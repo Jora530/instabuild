@@ -85,10 +85,50 @@
 
   /* ---------------- Peizazhi i vendit ---------------- */
   var groundMesh = null;
+  var worldAnims = [];   // { update: fn } — njerëz, makina, re
+  var people = [];
+  var cars = [];
+  var clouds = [];
 
-  function createGround(color, y) {
+  function grassTexture(tone) {
+    var c = document.createElement('canvas');
+    c.width = c.height = 256;
+    var ctx = c.getContext('2d');
+    var base = tone || '#5d8a3f';
+    ctx.fillStyle = base;
+    ctx.fillRect(0, 0, 256, 256);
+    var tones = ['#4d7a33', '#6b9747', '#54833a', '#63904a', '#3f6b2c', '#71a050'];
+    for (var i = 0; i < 1400; i++) {
+      ctx.fillStyle = tones[i % tones.length];
+      var s = 1 + Math.random() * 3;
+      ctx.fillRect(Math.random() * 256, Math.random() * 256, s, s);
+    }
+    var tex = new THREE.CanvasTexture(c);
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(50, 50);
+    return tex;
+  }
+
+  function concreteTexture() {
+    var c = document.createElement('canvas');
+    c.width = c.height = 256;
+    var ctx = c.getContext('2d');
+    ctx.fillStyle = '#8f9a8a';
+    ctx.fillRect(0, 0, 256, 256);
+    for (var i = 0; i < 500; i++) {
+      ctx.fillStyle = 'rgba(0,0,0,' + (0.03 + Math.random() * 0.05) + ')';
+      ctx.fillRect(Math.random() * 256, Math.random() * 256, 2 + Math.random() * 5, 1 + Math.random() * 3);
+    }
+    var tex = new THREE.CanvasTexture(c);
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(40, 40);
+    return tex;
+  }
+
+  function createGround(color, y, tex) {
     y = y || 0;
-    groundMesh = new THREE.Mesh(new THREE.PlaneGeometry(300, 300), new THREE.MeshLambertMaterial({ color: color }));
+    var mat = tex ? new THREE.MeshLambertMaterial({ map: tex }) : new THREE.MeshLambertMaterial({ color: color });
+    groundMesh = new THREE.Mesh(new THREE.PlaneGeometry(300, 300), mat);
     groundMesh.rotation.x = -Math.PI / 2;
     groundMesh.position.y = y;
     groundMesh.receiveShadow = true;
@@ -99,15 +139,161 @@
   function createTree(x, z, scale, y) {
     y = y || 0;
     var g = new THREE.Group();
-    var trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.22 * scale, 0.3 * scale, 1.6 * scale, 7), mat(0x6b4a2b));
-    trunk.position.y = 0.8 * scale;
+    var trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.18 * scale, 0.3 * scale, 1.8 * scale, 7), mat(0x6b4a2b));
+    trunk.position.y = 0.9 * scale;
     trunk.castShadow = true;
-    var leaves = new THREE.Mesh(new THREE.SphereGeometry(1.1 * scale, 8, 6), mat(0x3d6b2f));
-    leaves.position.y = 2.3 * scale;
-    leaves.castShadow = true;
-    g.add(trunk); g.add(leaves);
+    g.add(trunk);
+    // kurora me 3 shtresa — pamje më e bukur
+    var leafColors = [0x3d6b2f, 0x4a7a35, 0x335c26];
+    var layers = [
+      { r: 1.25, y: 2.2 },
+      { r: 0.95, y: 2.9 },
+      { r: 0.6, y: 3.5 }
+    ];
+    layers.forEach(function (L, i) {
+      var leaf = new THREE.Mesh(new THREE.ConeGeometry(L.r * scale, 1.3 * scale, 8), mat(leafColors[i]));
+      leaf.position.y = L.y * scale;
+      leaf.castShadow = true;
+      g.add(leaf);
+    });
     g.position.set(x, y, z);
     scene.add(g);
+    return g;
+  }
+
+  function createRock(x, z, s, y) {
+    y = y || 0;
+    var r = new THREE.Mesh(new THREE.DodecahedronGeometry(s, 0), mat(0x8a8f88));
+    r.position.set(x, y + s * 0.4, z);
+    r.rotation.set(Math.random() * 3, Math.random() * 3, 0);
+    r.scale.y = 0.7;
+    r.castShadow = true;
+    scene.add(r);
+  }
+
+  function createFlower(x, z, y) {
+    y = y || 0;
+    var g = new THREE.Group();
+    var stem = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.35, 5), mat(0x2f6b2a));
+    stem.position.y = 0.17;
+    var head = new THREE.Mesh(new THREE.SphereGeometry(0.11, 6, 5), mat([0xe74c3c, 0xf1c40f, 0xe67e22, 0x9b59b6, 0xff6b9d, 0xffffff][Math.floor(Math.random() * 6)]));
+    head.position.y = 0.38;
+    g.add(stem); g.add(head);
+    g.position.set(x, y, z);
+    scene.add(g);
+  }
+
+  function createCloud(x, y, z, s) {
+    var g = new THREE.Group();
+    var cMat = mat(0xffffff, { transparent: true, opacity: 0.92 });
+    var puffs = [[0, 0, 0, 1.4], [1.3, 0.2, 0.3, 1.0], [-1.3, 0.15, -0.2, 1.0], [0.5, 0.4, -0.6, 0.8]];
+    puffs.forEach(function (p) {
+      var m = new THREE.Mesh(new THREE.SphereGeometry(p[3] * s, 8, 6), cMat);
+      m.position.set(p[0] * s, p[1] * s, p[2] * s);
+      m.scale.y = 0.55;
+      g.add(m);
+    });
+    g.position.set(x, y, z);
+    scene.add(g);
+    clouds.push(g);
+    return g;
+  }
+
+  function createLamp(x, z) {
+    var g = new THREE.Group();
+    var pole = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.12, 4.2, 7), mat(0x3a3f45));
+    pole.position.y = 2.1;
+    var arm = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 1.2, 6), mat(0x3a3f45));
+    arm.rotation.z = Math.PI / 2;
+    arm.position.set(0.55, 3.9, 0);
+    var light = new THREE.Mesh(new THREE.SphereGeometry(0.22, 8, 6), new THREE.MeshLambertMaterial({ color: 0xfff3b0, emissive: 0xffd966, emissiveIntensity: 0.6 }));
+    light.position.set(1.15, 3.9, 0);
+    g.add(pole); g.add(arm); g.add(light);
+    g.position.set(x, 0, z);
+    scene.add(g);
+  }
+
+  /* -------- Njerëzit (figura 3D që ecin) -------- */
+  function makePerson() {
+    var g = new THREE.Group();
+    var skin = mat(0xe8b88a), shirt = mat([0x556b2f, 0x6b8e23, 0x2c3e50, 0x8b2f2f, 0x3a5f8a][Math.floor(Math.random() * 5)]), pants = mat([0x3a3a4a, 0x555d55, 0x2f2f3f][Math.floor(Math.random() * 3)]), shoes = mat(0x222222), hair = mat([0x3a2a1a, 0x1a1a1a, 0x6b4a2b][Math.floor(Math.random() * 3)]);
+
+    var body = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.75, 0.28), shirt);
+    body.position.y = 1.35;
+    g.add(body);
+    var head = new THREE.Mesh(new THREE.SphereGeometry(0.22, 10, 8), skin);
+    head.position.y = 1.95;
+    g.add(head);
+    var hairM = new THREE.Mesh(new THREE.SphereGeometry(0.23, 10, 6), hair);
+    hairM.position.y = 2.02;
+    hairM.scale.y = 0.7;
+    g.add(hairM);
+
+    // krahët me pivot për animacion
+    var leftArm = new THREE.Group();
+    leftArm.position.set(-0.32, 1.6, 0);
+    var la = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.6, 0.14), shirt);
+    la.position.y = -0.3;
+    leftArm.add(la);
+    g.add(leftArm);
+    var rightArm = new THREE.Group();
+    rightArm.position.set(0.32, 1.6, 0);
+    var ra = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.6, 0.14), shirt);
+    ra.position.y = -0.3;
+    rightArm.add(ra);
+    g.add(rightArm);
+
+    // këmbët
+    var leftLeg = new THREE.Group();
+    leftLeg.position.set(-0.12, 0.95, 0);
+    var ll = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.6, 0.15), pants);
+    ll.position.y = -0.3;
+    leftLeg.add(ll);
+    g.add(leftLeg);
+    var rightLeg = new THREE.Group();
+    rightLeg.position.set(0.12, 0.95, 0);
+    var rl = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.6, 0.15), pants);
+    rl.position.y = -0.3;
+    rightLeg.add(rl);
+    g.add(rightLeg);
+
+    g.userData.parts = { la: leftArm, ra: rightArm, ll: leftLeg, rl: rightLeg, body: body };
+    g.userData.phase = Math.random() * Math.PI * 2;
+    g.userData.speed = 1.2 + Math.random() * 0.8;
+    g.userData.dir = Math.random() * Math.PI * 2;
+    g.userData.radius = 14 + Math.random() * 18;
+    g.userData.baseY = 0;
+    g.userData.isPerson = true;
+    scene.add(g);
+    people.push(g);
+    return g;
+  }
+
+  /* -------- Makinat (vetëm qytet) -------- */
+  function makeCar(color) {
+    var g = new THREE.Group();
+    var body = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.55, 0.95), mat(color));
+    body.position.y = 0.5;
+    body.castShadow = true;
+    var cabin = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.45, 0.85), mat(0xbfe3f5));
+    cabin.position.set(-0.1, 0.95, 0);
+    g.add(body); g.add(cabin);
+    var wheelGeo = new THREE.CylinderGeometry(0.24, 0.24, 0.14, 10);
+    var wheelMat = mat(0x1a1a1a);
+    [[-0.6, 0, -0.5], [0.6, 0, -0.5], [-0.6, 0, 0.5], [0.6, 0, 0.5]].forEach(function (w) {
+      var wheel = new THREE.Mesh(wheelGeo, wheelMat);
+      wheel.rotation.x = Math.PI / 2;
+      wheel.position.set(w[0], 0.24, w[2]);
+      g.add(wheel);
+    });
+    g.userData.isCar = true;
+    g.userData.speed = 3 + Math.random() * 3;
+    g.userData.dir = Math.random() < 0.5 ? 1 : -1;
+    g.userData.axis = Math.random() < 0.5 ? 'x' : 'z';
+    g.userData.limit = 45;
+    scene.add(g);
+    cars.push(g);
+    return g;
   }
 
   function createBuilding(x, z, w, d, h, color) {
@@ -149,12 +335,20 @@
     clearLocation();
     var i, x, z, rnd;
     if (loc === 'city') {
-      createGround(0x8f9a8a, 0);
-      var roadMat = new THREE.MeshLambertMaterial({ color: 0x555d55 });
-      var road1 = new THREE.Mesh(new THREE.PlaneGeometry(8, 300), roadMat);
-      road1.rotation.x = -Math.PI / 2; road1.position.set(0, 0.02, 0); scene.add(road1);
-      var road2 = new THREE.Mesh(new THREE.PlaneGeometry(300, 8), roadMat);
-      road2.rotation.x = -Math.PI / 2; road2.position.set(0, 0.02, 0); scene.add(road2);
+      createGround(0x8f9a8a, 0, concreteTexture());
+      var roadMat = new THREE.MeshLambertMaterial({ color: 0x4a504a });
+      var road1 = new THREE.Mesh(new THREE.PlaneGeometry(9, 300), roadMat);
+      road1.rotation.x = -Math.PI / 2; road1.position.set(0, 0.03, 0); scene.add(road1);
+      var road2 = new THREE.Mesh(new THREE.PlaneGeometry(300, 9), roadMat);
+      road2.rotation.x = -Math.PI / 2; road2.position.set(0, 0.03, 0); scene.add(road2);
+      // vija të bardha në rrugë
+      var lineMat = new THREE.MeshLambertMaterial({ color: 0xd8d8c8 });
+      for (i = -14; i <= 14; i++) {
+        var dash = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 0.3), lineMat);
+        dash.rotation.x = -Math.PI / 2; dash.position.set(i * 3.2, 0.05, 0); scene.add(dash);
+        var dash2 = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 1.6), lineMat);
+        dash2.rotation.x = -Math.PI / 2; dash2.position.set(0, 0.05, i * 3.2); scene.add(dash2);
+      }
       rnd = seededRandom(11);
       for (i = 0; i < 26; i++) {
         var side = Math.random();
@@ -162,8 +356,25 @@
         z = (rnd() - 0.5) * 110;
         createBuilding(x, z, 5 + rnd() * 6, 5 + rnd() * 6, 6 + rnd() * 22, 0x9aa08c + Math.floor(rnd() * 6) * 0x0a0a08);
       }
+      // llamba rruge
+      for (i = -3; i <= 3; i++) {
+        if (i === 0) continue;
+        createLamp(i * 12, 5.5);
+        createLamp(i * 12, -5.5);
+      }
+      // makina
+      for (i = 0; i < 6; i++) {
+        var car = makeCar([0xc0392b, 0x2980b9, 0xe67e22, 0x7d8a2e, 0x8e44ad, 0x555555][i % 6]);
+        car.position.set((Math.random() - 0.5) * 60, 0, (Math.random() - 0.5) * 60);
+        car.rotation.y = car.userData.axis === 'x' ? Math.PI / 2 : 0;
+      }
+      // njerëz në qytet
+      for (i = 0; i < 8; i++) {
+        var p = makePerson();
+        p.position.set((Math.random() - 0.5) * 70, 0, (Math.random() - 0.5) * 70);
+      }
     } else if (loc === 'village') {
-      createGround(0x79a05a, 0);
+      createGround(0x79a05a, 0, grassTexture('#79a05a'));
       rnd = seededRandom(22);
       for (i = 0; i < 10; i++) {
         x = (rnd() - 0.5) * 60;
@@ -171,30 +382,50 @@
         if (Math.abs(x) < 9 && Math.abs(z) < 9) continue;
         createVillageHouse(x, z, rnd());
         createTree(x + 3.5, z + 2.5, 0.8 + rnd() * 0.5, 0);
+        createFlower(x + 2.2, z + 2.6, 0);
+        createFlower(x + 2.8, z + 2.2, 0);
       }
       for (i = 0; i < 14; i++) createTree((rnd() - 0.5) * 90, (rnd() - 0.5) * 90, 0.8 + rnd() * 0.6, 0);
+      for (i = 0; i < 12; i++) createFlower((rnd() - 0.5) * 70, (rnd() - 0.5) * 70, 0);
+      for (i = 0; i < 5; i++) createRock((rnd() - 0.5) * 70, (rnd() - 0.5) * 70, 0.3 + rnd() * 0.5, 0);
+      for (i = 0; i < 4; i++) {
+        var pv = makePerson();
+        pv.position.set((rnd() - 0.5) * 50, 0, (rnd() - 0.5) * 50);
+      }
     } else if (loc === 'nature') {
-      createGround(0x5d8a3f, 0);
+      createGround(0x5d8a3f, 0, grassTexture('#5d8a3f'));
       createLake(26, -18, 10);
       rnd = seededRandom(33);
-      for (i = 0; i < 40; i++) {
+      for (i = 0; i < 46; i++) {
         x = (rnd() - 0.5) * 120;
         z = (rnd() - 0.5) * 120;
         if (Math.abs(x) < 10 && Math.abs(z) < 10) continue;
         if (x > 18 && z < -10) continue;
         createTree(x, z, 0.7 + rnd() * 0.9, 0);
       }
-      rnd = seededRandom(44);
-      for (i = 0; i < 30; i++) {
-        x = (rnd() - 0.5) * 70;
-        z = (rnd() - 0.5) * 70;
+      for (i = 0; i < 34; i++) {
+        x = (rnd() - 0.5) * 90;
+        z = (rnd() - 0.5) * 90;
         if (Math.abs(x) < 8 && Math.abs(z) < 8) continue;
-        var flower = new THREE.Mesh(new THREE.SphereGeometry(0.25, 6, 5), mat([0xe74c3c, 0xf1c40f, 0xe67e22, 0x9b59b6][Math.floor(rnd() * 4)]));
-        flower.position.set(x, 0.28, z);
-        scene.add(flower);
+        if (x > 18 && z < -10) continue;
+        createFlower(x, z, 0);
+      }
+      for (i = 0; i < 10; i++) createRock((rnd() - 0.5) * 80, (rnd() - 0.5) * 80, 0.3 + rnd() * 0.7, 0);
+      // kërpudha
+      for (i = 0; i < 6; i++) {
+        var mx = (rnd() - 0.5) * 60, mz = (rnd() - 0.5) * 60;
+        if (Math.abs(mx) < 8 && Math.abs(mz) < 8) continue;
+        var mush = new THREE.Mesh(new THREE.SphereGeometry(0.16, 6, 4), mat([0xc0392b, 0xe67e22][i % 2]));
+        mush.scale.y = 0.7;
+        mush.position.set(mx, 0.28, mz);
+        scene.add(mush);
+      }
+      for (i = 0; i < 3; i++) {
+        var pn = makePerson();
+        pn.position.set((rnd() - 0.5) * 50, 0, (rnd() - 0.5) * 50);
       }
     } else if (loc === 'hill') {
-      createGround(0x6f9a4a, -6);
+      createGround(0x6f9a4a, -6, grassTexture('#6f9a4a'));
       var hill = new THREE.Mesh(new THREE.SphereGeometry(26, 22, 18), new THREE.MeshLambertMaterial({ color: 0x55803a }));
       hill.scale.y = 0.62;
       hill.position.set(0, -4, 0);
@@ -205,13 +436,28 @@
       plateau.position.set(0, 7.4, 0);
       scene.add(plateau);
       rnd = seededRandom(55);
-      for (i = 0; i < 18; i++) {
+      for (i = 0; i < 20; i++) {
         x = (rnd() - 0.5) * 46;
         z = (rnd() - 0.5) * 46;
         if (Math.abs(x) < 10 && Math.abs(z) < 10) continue;
         var dist = Math.sqrt(x * x + z * z);
         createTree(x, z, 0.7 + rnd() * 0.7, -6 + Math.max(0, 5.4 - dist * dist / 210) * 0.4);
       }
+      for (i = 0; i < 8; i++) {
+        x = (rnd() - 0.5) * 40;
+        z = (rnd() - 0.5) * 40;
+        if (Math.abs(x) < 10 && Math.abs(z) < 10) continue;
+        createRock(x, z, 0.3 + rnd() * 0.6, -6 + Math.max(0, 5.4 - (x * x + z * z) / 210) * 0.4);
+      }
+      for (i = 0; i < 3; i++) {
+        var ph = makePerson();
+        ph.position.set((rnd() - 0.5) * 40, 7.3, (rnd() - 0.5) * 40);
+        ph.userData.baseY = 7.3;
+      }
+    }
+    // re për të gjitha vendet
+    for (i = 0; i < 5; i++) {
+      createCloud((Math.random() - 0.5) * 130, 26 + Math.random() * 12, (Math.random() - 0.5) * 130, 1.6 + Math.random() * 1.6);
     }
   }
 
@@ -235,7 +481,66 @@
       scene.remove(c);
       disposeObj(c);
     });
+    people = [];
+    cars = [];
+    clouds = [];
     if (groundMesh) { groundMesh = null; }
+  }
+
+  /* ---------------- Animacioni i botës (njerëz, makina, re) ---------------- */
+  function animateWorld(dt) {
+    var i;
+    // njerëzit ecin
+    for (i = 0; i < people.length; i++) {
+      var p = people[i];
+      if (!p.parent) continue;
+      var u = p.userData;
+      u.phase += dt * u.speed;
+      // lëviz në drejtim, kthehet brenda rrezes
+      p.position.x += Math.cos(u.dir) * dt * u.speed;
+      p.position.z += Math.sin(u.dir) * dt * u.speed;
+      var r = Math.sqrt(p.position.x * p.position.x + p.position.z * p.position.z);
+      if (r > u.radius) u.dir = Math.atan2(-p.position.z, -p.position.x) + (Math.random() - 0.5) * 0.8;
+      if (r < 3) u.dir = Math.atan2(p.position.z, p.position.x) + (Math.random() - 0.5) * 0.8;
+      // lëvizja e këmbëve e krahëve
+      var swing = Math.sin(u.phase) * 0.6;
+      u.parts.la.rotation.x = swing;
+      u.parts.ra.rotation.x = -swing;
+      u.parts.ll.rotation.x = -swing * 0.9;
+      u.parts.rl.rotation.x = swing * 0.9;
+      // kërce pak
+      p.position.y = u.baseY + Math.abs(Math.cos(u.phase)) * 0.06;
+      p.rotation.y = u.dir;
+    }
+    // makinat lëvizin në rrugë
+    for (i = 0; i < cars.length; i++) {
+      var car = cars[i];
+      if (!car.parent) continue;
+      var cu = car.userData;
+      if (cu.axis === 'x') {
+        car.position.x += cu.dir * cu.speed * dt;
+        if (car.position.x > cu.limit) { car.position.x = cu.limit; cu.dir = -1; }
+        if (car.position.x < -cu.limit) { car.position.x = -cu.limit; cu.dir = 1; }
+        // mbaj në korsinë e duhur
+        var laneZ = car.position.z > 0 ? 2.8 : -2.8;
+        car.position.z += (laneZ - car.position.z) * 2 * dt;
+        car.rotation.y = cu.dir > 0 ? Math.PI / 2 : -Math.PI / 2;
+      } else {
+        car.position.z += cu.dir * cu.speed * dt;
+        if (car.position.z > cu.limit) { car.position.z = cu.limit; cu.dir = -1; }
+        if (car.position.z < -cu.limit) { car.position.z = -cu.limit; cu.dir = 1; }
+        var laneX = car.position.x > 0 ? 2.8 : -2.8;
+        car.position.x += (laneX - car.position.x) * 2 * dt;
+        car.rotation.y = cu.dir > 0 ? 0 : Math.PI;
+      }
+    }
+    // retë lëvizin ngadalë
+    for (i = 0; i < clouds.length; i++) {
+      var cl = clouds[i];
+      if (!cl.parent) continue;
+      cl.position.x += dt * 1.2;
+      if (cl.position.x > 70) cl.position.x = -70;
+    }
   }
 
   function disposeObj(o) {
@@ -285,11 +590,30 @@
     return m;
   }
   function makeWindow(w, h, color) {
-    var m = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.08), mat(color || 0x9fd8f0));
-    m.castShadow = true;
-    m.userData.partType = 'window';
-    m.userData.w = w; m.userData.h = h;
-    return m;
+    // dritare me kornizë të bardhë — pamje më e bukur si HD3D
+    var g = new THREE.Group();
+    var frameMat = mat(0xf5f5f0);
+    var glassMat = mat(color || 0x9fd8f0);
+    var fr = 0.07; // trashësia e kornizës
+    var glass = new THREE.Mesh(new THREE.BoxGeometry(w - fr * 2, h - fr * 2, 0.06), glassMat);
+    glass.position.z = 0.02;
+    glass.castShadow = true;
+    g.add(glass);
+    // anët e kornizës
+    var top = new THREE.Mesh(new THREE.BoxGeometry(w, fr, 0.1), frameMat);
+    top.position.y = h / 2 - fr / 2;
+    var bottom = new THREE.Mesh(new THREE.BoxGeometry(w, fr, 0.1), frameMat);
+    bottom.position.y = -h / 2 + fr / 2;
+    var left = new THREE.Mesh(new THREE.BoxGeometry(fr, h, 0.1), frameMat);
+    left.position.x = -w / 2 + fr / 2;
+    var right = new THREE.Mesh(new THREE.BoxGeometry(fr, h, 0.1), frameMat);
+    right.position.x = w / 2 - fr / 2;
+    var mid = new THREE.Mesh(new THREE.BoxGeometry(fr, h - fr * 2, 0.1), frameMat);
+    g.add(top); g.add(bottom); g.add(left); g.add(right); g.add(mid);
+    g.traverse(function (c) { if (c.isMesh) c.castShadow = true; });
+    g.userData.partType = 'window';
+    g.userData.w = w; g.userData.h = h;
+    return g;
   }
   function makeDoor(w, h, color) {
     var m = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.1), mat(color || 0x6b4a2b));
@@ -578,6 +902,7 @@
     }
     var y = state.location === 'hill' ? 7.3 : 0;
     houseGroup.position.y = y;
+    decoratePlot();
     document.getElementById('hud-loc').textContent = { city: '🏙️ Qytet', village: '🏡 Fshat', nature: '🌲 Natyrë', hill: '⛰️ Kodër' }[state.location] || '';
     resetCamera();
   }
@@ -586,6 +911,55 @@
     camera.position.set(20, 15, 22);
     controls.target.set(0, state.location === 'hill' ? 7.3 : 2, 0);
     controls.update();
+  }
+
+  /* ---------------- Dekorimi i oborrit: gardh + shteg + lule ---------------- */
+  function decoratePlot() {
+    if (!houseGroup) return;
+    var b = new THREE.Box3().setFromObject(houseGroup);
+    var minX = b.min.x, maxX = b.max.x, minZ = b.min.z, maxZ = b.max.z;
+    var cx = (minX + maxX) / 2, cz = (minZ + maxZ) / 2;
+    var baseY = state.location === 'hill' ? 7.3 : 0;
+    var pad = 1.6;
+    var x1 = minX - pad, x2 = maxX + pad, z1 = minZ - pad, z2 = maxZ + pad;
+    // tokë e veçantë për oborrin
+    var plot = new THREE.Mesh(
+      new THREE.PlaneGeometry(x2 - x1, z2 - z1),
+      new THREE.MeshLambertMaterial({ color: 0x8fae6a, transparent: true, opacity: 0.6 })
+    );
+    plot.rotation.x = -Math.PI / 2;
+    plot.position.set(cx, baseY + 0.02, cz);
+    houseGroup.add(plot);
+    // gardh
+    var fenceMat = mat(0xc9b896);
+    var postMat = mat(0x8a7355);
+    function fenceSegment(a, c, lenX, lenZ) {
+      var rail = new THREE.Mesh(new THREE.BoxGeometry(lenX, 0.12, lenZ), fenceMat);
+      rail.position.set(a.x + lenX / 2, baseY + 0.6, a.z + lenZ / 2);
+      houseGroup.add(rail);
+      var n = Math.max(2, Math.round((lenX + lenZ) / 1.2));
+      for (var i = 0; i <= n; i++) {
+        var post = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.95, 0.09), postMat);
+        post.position.set(a.x + (lenX / n) * i, baseY + 0.47, a.z + (lenZ / n) * i);
+        houseGroup.add(post);
+      }
+    }
+    fenceSegment(new THREE.Vector3(x1, 0, z1), null, x2 - x1, 0);
+    fenceSegment(new THREE.Vector3(x1, 0, z2), null, x2 - x1, 0);
+    fenceSegment(new THREE.Vector3(x1, 0, z1), null, 0, z2 - z1);
+    fenceSegment(new THREE.Vector3(x2, 0, z1), null, 0, z2 - z1);
+    // shteg nga dera (gjithmonë në qendër të fasadës së përparme)
+    var path = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.03, 2.6), mat(0xd9cfb2));
+    path.position.set(cx, baseY + 0.04, z2 - 1.3);
+    houseGroup.add(path);
+    // lule përreth
+    for (var i = 0; i < 8; i++) {
+      var fx = x1 + Math.random() * (x2 - x1);
+      var fz = (Math.random() < 0.5 ? z1 : z2) + (Math.random() - 0.5) * 0.8;
+      var fl = new THREE.Mesh(new THREE.SphereGeometry(0.09, 6, 5), mat([0xe74c3c, 0xf1c40f, 0xe67e22, 0x9b59b6, 0xff6b9d][Math.floor(Math.random() * 5)]));
+      fl.position.set(fx, baseY + 0.25, fz);
+      houseGroup.add(fl);
+    }
   }
 
   /* ============================================================
@@ -1237,9 +1611,10 @@
   /* ---------------- Loop ---------------- */
   function animate() {
     requestAnimationFrame(animate);
-    clock.getDelta();
+    var dt = clock.getDelta();
     if (controls.enabled) controls.update();
     updateInsideMovement();
+    animateWorld(dt);
     renderer.render(scene, camera);
   }
 

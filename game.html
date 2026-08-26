@@ -15,176 +15,123 @@
 <div id="game-wrap">
   <canvas id="game-canvas"></canvas>
 
-  <!-- ============ EKRANI 1: ZGJIDH VENDIN ============ -->
-  <div class="screen active" id="screen-location">
+  <!-- ============ EKRANI I FILLIMIT ============ -->
+  <div class="screen active" id="screen-start">
     <div class="screen-card">
       <div class="logo-row"><img src="images/instabuilt-thumbnail.png" alt="InstaBuilt"><span>Insta<em>Built</em></span> <b class="badge-3d">3D</b></div>
       <h1>🏗️ Ndërto Shtëpinë Tënde 3D</h1>
-      <p class="sub">Para se të fillosh, zgjidh <b>vendin</b> ku dëshiron ta ndërtosh shtëpinë tënde të ëndrrave:</p>
-      <div class="loc-grid">
-        <button class="loc-card" data-location="city" type="button">
-          <span class="loc-ico">🏙️</span>
-          <b>Qytet</b>
-          <small>Banesa, zhurmë e qytetit, vendi më i mirë për apartamente</small>
-        </button>
-        <button class="loc-card" data-location="village" type="button">
-          <span class="loc-ico">🏡</span>
-          <b>Fshat</b>
-          <small>Shtëpi të vogla, qetësi, natyrë përreth</small>
-        </button>
-        <button class="loc-card" data-location="nature" type="button">
-          <span class="loc-ico">🌲</span>
-          <b>Natyrë</b>
-          <small>Mes pyllit dhe liqenit — shtëpia jote në natyrë</small>
-        </button>
-        <button class="loc-card" data-location="hill" type="button">
-          <span class="loc-ico">⛰️</span>
-          <b>Kodër</b>
-          <small>Në majë të kodrës me pamje mahnitëse</small>
-        </button>
-      </div>
+      <p class="sub">Vizato <b>planimetrinë në 2D</b>, vendos dyer e dritare, mbushe shtëpinë brenda e jashtë me mobilie, dhe shëtit në <b>3D në kohë reale</b> — me ndriçim nga mëngjesi deri natën.</p>
+      <button class="btn-start" id="btn-start" type="button">🚀 Filloni ndërtimin</button>
       <button class="btn-continue hidden" id="btn-continue" type="button">💾 Vazhdo lojën e ruajtur</button>
-      <p class="foot-note">Loja ruhet automatikisht me butonin "Ruaj" — ndërto, ruaj dhe vazhdo kur të duash!</p>
+      <p class="foot-note">Vizato planimetrinë në 2D, pastaj kalo në 3D për të mobiluar e për ta parë shtëpinë. Ruaje projektin kur të duash.</p>
     </div>
   </div>
 
-  <!-- ============ EKRANI 2: ZGJIDH SHTËPINË ============ -->
-  <div class="screen" id="screen-house">
-    <div class="screen-card">
-      <button class="btn-back" id="btn-back-house" type="button">← Kthehu</button>
-      <h1>🏠 Zgjidh Shtëpinë Tënde</h1>
-      <p class="sub">Zgjidh një shtëpi <b>të gatshme</b> (si instabuilt-i) ose <b>ndërtoje vetë</b> me mure, kulme, dritare, dyer dhe mobilie.</p>
-      <div class="house-grid">
-        <button class="house-card" data-house="traditional" type="button">
-          <span class="house-ico">🏡</span>
-          <b>Traditional Homes</b>
-          <small>Shtëpi klasike evropiane — gati me mobilie</small>
-        </button>
-        <button class="house-card" data-house="popup" type="button">
-          <span class="house-ico">🏠</span>
-          <b>POP UP Solutions</b>
-          <small>Shtëpi moderne kompakte 28/52/104 m² — gati</small>
-        </button>
-        <button class="house-card" data-house="signature" type="button">
-          <span class="house-ico">✨</span>
-          <b>Signature Homes</b>
-          <small>Vilë luksoze — gati me mobilie</small>
-        </button>
-        <button class="house-card" data-house="custom" type="button">
-          <span class="house-ico">🔨</span>
-          <b>Ndërto Vetë</b>
-          <small>Mure katrorë e drejtkëndësh, kulme, dritare, dyer, mobilie — si të duash!</small>
-        </button>
-      </div>
-      <div class="apt-note" id="apt-note">📐 Banesat (Micro, Senior, Multistory) — <b>vetëm në Qytet</b>, vendi më i mirë për banesa.</div>
-      <div class="apt-grid">
-        <button class="house-card apt" data-house="micro" type="button">
-          <span class="house-ico">📐</span>
-          <b>Micro Apartments</b>
-          <small>Ndërtesë banesash efikase</small>
-        </button>
-        <button class="house-card apt" data-house="senior" type="button">
-          <span class="house-ico">👵</span>
-          <b>Senior Housing</b>
-          <small>Banesa komode për të moshuar</small>
-        </button>
-        <button class="house-card apt" data-house="multistory" type="button">
-          <span class="house-ico">🏢</span>
-          <b>Multistory Multifamily</b>
-          <small>Ndërtesë e madhe shumëkatëshe</small>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ============ EKRANI 3: MOBILIE (për shtëpitë e gatshme) ============ -->
-  <div class="screen" id="screen-furniture">
-    <div class="screen-card">
-      <button class="btn-back" id="btn-back-furn" type="button">← Kthehu</button>
-      <h1>🛋️ Mobilie</h1>
-      <p class="sub">Si dëshiron ta mobilosh shtëpinë tënde?</p>
-      <div class="two-grid">
-        <button class="house-card" data-furn="ready" type="button">
-          <span class="house-ico">🛋️</span>
-          <b>Me Mobilie Gati</b>
-          <small>Shtëpia vjen e mobiluar plotësisht — gati për jetesë!</small>
-        </button>
-        <button class="house-card" data-furn="custom" type="button">
-          <span class="house-ico">🔨</span>
-          <b>Mobilie Vetë</b>
-          <small>Vendos ti vetë: krevat, tavolinë, karrige, divan, TV, raft</small>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ============ EKRANI 4: NDËRTIMI VETË ============ -->
-  <div class="screen" id="screen-build">
-    <div class="build-panel">
-      <h3>🔨 Ndërto shtëpinë tënde</h3>
-      <p class="panel-hint">Zgjidh një pjesë, kliko në tokë për ta vendosur. <b>R</b> = rrotullo · <b>+/-</b> = lartësia · <b>Del</b> = fshi</p>
-      <div class="palette" id="palette-build"></div>
-      <div class="color-row" id="color-row">
-        <span>Ngjyra:</span>
-        <button class="color-dot active" data-color="#e8e4d8" title="E bardhë" style="background:#e8e4d8"></button>
-        <button class="color-dot" data-color="#556b2f" title="Olive" style="background:#556b2f"></button>
-        <button class="color-dot" data-color="#a3b86c" title="Olive e lehtë" style="background:#a3b86c"></button>
-        <button class="color-dot" data-color="#8b5a2b" title="Kafe" style="background:#8b5a2b"></button>
-        <button class="color-dot" data-color="#c0392b" title="E kuqe" style="background:#c0392b"></button>
-        <button class="color-dot" data-color="#2c3e50" title="E errët" style="background:#2c3e50"></button>
-        <button class="color-dot" data-color="#f1c40f" title="E verdhë" style="background:#f1c40f"></button>
-      </div>
-      <div class="build-actions">
-        <button class="btn-game btn-ghost" id="btn-rotate" type="button">🔄 Rrotullo (R)</button>
-        <button class="btn-game btn-ghost" id="btn-up" type="button">⬆️ Lart (+)</button>
-        <button class="btn-game btn-ghost" id="btn-down" type="button">⬇️ Poshtë (−)</button>
-        <button class="btn-game btn-ghost" id="btn-remove" type="button">🗑️ Fshi (kliko një pjesë)</button>
-        <button class="btn-game btn-ghost" id="btn-undo" type="button">↩️ Zhbëj</button>
-        <button class="btn-game btn-primary" id="btn-build-done" type="button">✅ Mbarova!</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ============ EKRANI 5: MOBILIMI VETË ============ -->
-  <div class="screen" id="screen-furnish">
-    <div class="build-panel">
-      <h3>🛋️ Vendos mobilie</h3>
-      <p class="panel-hint">Zgjidh një mobilie, kliko në tokë për ta vendosur. <b>R</b> = rrotullo · <b>+/-</b> = lartësia · <b>Del</b> = fshi</p>
-      <div class="palette" id="palette-furnish"></div>
-      <div class="build-actions">
-        <button class="btn-game btn-ghost" id="btn-rotate2" type="button">🔄 Rrotullo (R)</button>
-        <button class="btn-game btn-ghost" id="btn-up2" type="button">⬆️ Lart (+)</button>
-        <button class="btn-game btn-ghost" id="btn-down2" type="button">⬇️ Poshtë (−)</button>
-        <button class="btn-game btn-ghost" id="btn-remove2" type="button">🗑️ Fshi</button>
-        <button class="btn-game btn-ghost" id="btn-undo2" type="button">↩️ Zhbëj</button>
-        <button class="btn-game btn-primary" id="btn-furnish-done" type="button">✅ Mbarova!</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ============ HUD I LOJËS ============ -->
+  <!-- ============ HUD ============ -->
   <div class="hud hidden" id="hud">
     <div class="hud-top">
-      <div class="hud-logo"><img src="images/instabuilt-thumbnail.png" alt=""><span>Insta<em>Built</em></span> <span class="hud-loc" id="hud-loc"></span></div>
+      <div class="hud-left">
+        <div class="hud-logo"><img src="images/instabuilt-thumbnail.png" alt=""><span>Insta<em>Built</em></span> <span class="hud-loc" id="hud-loc"></span></div>
+        <div class="floor-bar" id="floor-bar"></div>
+        <div class="daynight">
+          <span class="daynight-label" id="daynight-label">☀️ Mesditë</span>
+          <input type="range" id="time-slider" min="0" max="100" value="50">
+        </div>
+      </div>
       <div class="hud-btns">
-        <button class="btn-game btn-ghost" id="btn-2d" type="button">📐 Pamja 2D</button>
+        <button class="btn-game btn-ghost" id="btn-2d" type="button">📐 2D</button>
         <button class="btn-game btn-ghost" id="btn-inside" type="button">🚪 Shiko brenda</button>
         <button class="btn-game btn-ghost" id="btn-save" type="button">💾 Ruaj</button>
+        <button class="btn-game btn-ghost" id="btn-coop" type="button">👥 Co-op</button>
         <button class="btn-game btn-ghost" id="btn-restart" type="button">🔄 Fillo nga e para</button>
       </div>
     </div>
+
+    <!-- Paneli i ndërtimit (majtas) -->
+    <div class="side-panel" id="panel-build">
+      <div class="panel-title">🔨 Ndërto</div>
+      <div class="tabs" id="tool-tabs">
+        <button class="tab active" data-tab="house" type="button">Shtëpi</button>
+        <button class="tab" data-tab="build" type="button">Ndërtim</button>
+        <button class="tab" data-tab="furniture" type="button">Mobilie</button>
+        <button class="tab" data-tab="struct" type="button">Strukturë</button>
+        <button class="tab" data-tab="outdoor" type="button">Jashtë</button>
+      </div>
+      <div class="tool-list" id="tool-list"></div>
+      <div class="panel-hint" id="tool-hint">Kliko në tokë për të vendosur</div>
+    </div>
+
+    <!-- Paneli i stilit (djathtas): ngjyra + materiale + transform -->
+    <div class="side-panel right" id="panel-style">
+      <div class="panel-title">🎨 Stili</div>
+      <div class="style-row">
+        <div class="style-col">
+          <canvas id="colorwheel" width="160" height="160"></canvas>
+          <div class="value-row">
+            <span>Ndriçim</span>
+            <input type="range" id="value-slider" min="0" max="100" value="100">
+          </div>
+          <div class="swatch-row">
+            <div class="swatch" id="current-swatch"></div>
+            <input type="color" id="color-input" value="#e8e4d8">
+          </div>
+        </div>
+        <div class="style-col">
+          <div class="style-label">Materiali</div>
+          <div class="material-list" id="material-list"></div>
+        </div>
+      </div>
+      <div class="transform-actions">
+        <button class="btn-game btn-ghost small" id="btn-move" type="button">✋ Lëviz</button>
+        <button class="btn-game btn-ghost small" id="btn-paint" type="button">🖌️ Lyej</button>
+        <button class="btn-game btn-ghost small" id="btn-delete" type="button">🗑️ Fshi</button>
+        <button class="btn-game btn-ghost small" id="btn-snap" type="button">📏 Snap</button>
+      </div>
+      <div class="rot-row">
+        <button class="btn-game btn-ghost small" id="btn-rot-ccw" type="button">↺</button>
+        <span class="rot-label">Rrotullim</span>
+        <button class="btn-game btn-ghost small" id="btn-rot-cw" type="button">↻</button>
+        <button class="btn-game btn-ghost small" id="btn-rot-90" type="button">90°</button>
+      </div>
+      <div class="undo-row">
+        <button class="btn-game btn-ghost small" id="btn-undo" type="button">↩️ Zhbëj</button>
+        <button class="btn-game btn-ghost small" id="btn-redo" type="button">↪️ Rikthe</button>
+      </div>
+    </div>
+
     <div class="hud-bottom">
-      <div class="hud-tip">🖱️ Rrotullo pamjen: tërhiq me maus · Zmadho: rrota · Brenda: WASD + tërhiq</div>
+      <div class="hud-tip">📐 Vizato planimetrinë në <b>2D</b>: kliko e tërhiq për mure · <b>Q/E</b> rrotullim · <b>R</b> 90° · <b>Shift</b> snap · kalo në <b>3D</b> me butonin 📐2D · Brenda: WASD</div>
       <div class="toast" id="toast"></div>
     </div>
   </div>
 
-  <!-- ============ SHPJEGIM I BRENDSHËM ============ -->
   <div class="inside-hint hidden" id="inside-hint">🚶 Je brenda shtëpisë! Lëviz me <b>WASD</b>, shiko me maus, <b>Shift</b> = vrapo</div>
+
+  <!-- ============ MODALI CO-OP ============ -->
+  <div class="modal hidden" id="coop-modal">
+    <div class="modal-card">
+      <button class="btn-back" id="btn-coop-close" type="button">✕</button>
+      <h2>👥 Ndërto bashkë (Co-op)</h2>
+      <p class="sub">Deri në 4 lojtarë online, në të njëjtën shtëpi.</p>
+      <button class="btn-game btn-primary" id="btn-host" type="button">🏠 Krijo dhomë</button>
+      <div class="coop-room hidden" id="coop-room">
+        <div class="coop-code-label">Kodi i dhomës — jepjua shokëve:</div>
+        <div class="coop-code" id="coop-code-display">—</div>
+        <div class="coop-peers" id="coop-peers">Lojtarë: 1</div>
+      </div>
+      <div class="coop-divider">ose</div>
+      <div class="coop-join-row">
+        <input type="text" id="coop-code" placeholder="Kodi i dhomës" maxlength="12">
+        <button class="btn-game btn-ghost" id="btn-join" type="button">🔗 Bashkohu</button>
+      </div>
+      <div class="coop-status" id="coop-status">Nuk je lidhur.</div>
+    </div>
+  </div>
 </div>
 
 <script src="js/vendor/three.min.js"></script>
 <script src="js/vendor/OrbitControls.js"></script>
+<script src="js/vendor/peerjs.min.js"></script>
 <script src="js/game.js"></script>
 </body>
 </html>

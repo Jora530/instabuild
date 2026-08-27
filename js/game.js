@@ -1048,6 +1048,7 @@
       furn('sofa', -2.2, -2.6, 0); furn('coffee-table', -2.2, -1.7, 0); furn('tv', -2.2, -3.5, Math.PI);
       furn('kitchen-counter', 3.2, -2.9, 0); furn('sink', 3.2, -2.0, 0); furn('fridge', 4.3, -3.2, 0);
       furn('bed', 3.3, 2.6, 0); furn('lamp', -4.3, 2.6, 0); furn('rug', 0.5, 0.5, 0);
+      furn('armchair', -0.3, -2.2, 0); furn('bookcase', -4.6, 0, Math.PI / 2); furn('plant', 0.5, -0.5, 0); furn('wardrobe', -4.5, 2.6, 0);
       fenceRect(-9.5, 9.5, -8.5, 8.5, 0, 3);
       put(makeOutdoor('tree'), -8, 0, 4, 0, 0);
       put(makeOutdoor('tree'), 8, 0, -4, 0, 0);
@@ -1064,6 +1065,7 @@
       put(makeChimney('#8a6a4a', 'brick'), 2.5, WALL_H + 0.8, -1.8, 0);
       furn('sofa', -2.2, -2, 0); furn('table', 1.8, -2, 0); furn('chair', 1.2, -1.2, 0); furn('chair', 2.4, -1.2, 0);
       furn('bed', 2.6, 2, Math.PI / 2); furn('shelf', -3.2, 2.2, Math.PI / 2); furn('lamp', -0.5, 0.5, 0);
+      furn('rug', 0, 0, 0); furn('tv', -1, -2.8, Math.PI); furn('armchair', -3.4, -0.5, 0); furn('plant', 3, 1.5, 0);
       fenceRect(-8, 8, -7.5, 7.5, 0, 3);
       put(makeOutdoor('tree'), -6.5, 0, 3, 0, 0);
       put(makeOutdoor('tree'), 6.5, 0, -3, 0, 0);
@@ -1076,6 +1078,7 @@
       door(1.5, 2.3, 0, 4.15, 0);
       furn('sofa', -3, -2.6, 0); furn('coffee-table', -3, -1.7, 0); furn('tv', -3, -3.5, Math.PI);
       furn('kitchen-counter', 3, -2.9, 0); furn('table', 3.2, 1.6, 0); furn('chair', 2.6, 1.0, 0);
+      furn('armchair', -1.5, -2.2, 0); furn('plant', 0, 1.8, 0); furn('bookcase', -5, 0.5, Math.PI / 2);
       put(makeStairs('#c9c2b0', 'concrete'), -4.5, 0, -2.5, Math.PI / 2, 0);
       state.floorCount = 2;
       put(makeSlab(12.6, 8.6, '#c9c2b0', 'wood'), 0, FLOOR_H, 0, 0, 0);
@@ -1084,6 +1087,7 @@
       win(1.5, 1.2, -2, 1.7, 4.15, 0, 1); win(1.5, 1.2, 2, 1.7, 4.15, 0, 1);
       furn('bed', -3.5, 2.6, 0, 1); furn('bed', 3.5, 2.6, 0, 1); furn('wardrobe', -5, -2, Math.PI / 2, 1);
       furn('bathtub', 4, -2, 0, 1); furn('toilet', 5, -1, 0, 1); furn('sink', 2, -3, 0, 1);
+      furn('lamp', -1, 0, 0, 1); furn('rug', 0, 0.5, 0, 1); furn('plant', 1, 2, 0, 1);
       put(makeFlatRoof(12.6, 8.6, SLATE, 'metal'), 0, FLOOR_H + WALL_H + 0.12, 0, 0);
       put(makeOutdoor('pool'), 0, 0, 7, 0, 0);
       put(makeOutdoor('tree'), -9, 0, 5, 0, 0);
@@ -1096,6 +1100,7 @@
       put(makePyramidRoof(7, 6, 1.6, ROOFD, 'wood'), 0, WALL_H + 0.8, 0, 0);
       furn('bed', -1.8, -1.3, 0); furn('sofa', 1.5, -1.5, 0); furn('table', 1.5, 1.2, 0); furn('chair', 1.5, 1.8, 0);
       furn('lamp', -2.2, 1.4, 0); furn('rug', 0, 0, 0);
+      furn('wardrobe', -2.6, 1.4, 0); furn('shelf', 2.6, -0.5, Math.PI / 2); furn('plant', -2.5, -1.5, 0); furn('coffee-table', 1.5, -0.5, 0);
       fenceRect(-7, 7, -6.5, 6.5, 0, 3);
       put(makeOutdoor('tree'), -5.5, 0, 2, 0, 0);
       put(makeOutdoor('tree'), 5.5, 0, -2, 0, 0);
@@ -1981,15 +1986,15 @@
           if (cc.isMesh) cc.castShadow = false;
           if (cc.material) {
             cc.material.transparent = true;
-            cc.material.opacity = isWall ? 0.5 : 0.08;
+            cc.material.opacity = isWall ? 1.0 : 0.06;
             cc.material.depthWrite = isWall;
             cc.material.needsUpdate = true;
           }
         });
       }
     });
-    insideLight = new THREE.PointLight(0xfff2d8, 1.2, 32, 1.7);
-    insideLight.position.set(c.x, floorBase + 2.6, c.z);
+    insideLight = new THREE.PointLight(0xfff2d8, 1.4, 40, 1.6);
+    insideLight.position.set(c.x, floorBase + 2.8, c.z);
     scene.add(insideLight);
     insideActive = true;
     document.getElementById('btn-inside').textContent = '🏞️ Dil jashtë';

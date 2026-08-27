@@ -1022,6 +1022,21 @@
     function furn(t, x, z, rotY, floor) {
       put(makeFurniture(t), x, (floor || 0) * FLOOR_H, z, rotY, floor);
     }
+    function fenceRect(x0, x1, z0, z1, gapX, gapW) {
+      function side(ax, az, bx, bz, gx, gw) {
+        var dx = bx - ax, dz = bz - az, len = Math.sqrt(dx * dx + dz * dz), ang = Math.atan2(dz, dx);
+        var n = Math.max(1, Math.round(len / 2.4));
+        for (var i = 0; i < n; i++) {
+          var t = (i + 0.5) / n, x = ax + dx * t, z = az + dz * t;
+          if (gw && Math.abs(x - gx) < gw / 2) continue;
+          put(makeOutdoor('fence'), x, 0, z, ang, 0);
+        }
+      }
+      side(x0, z0, x1, z0, 0, 0);          // mbrapa
+      side(x0, z1, x1, z1, gapX, gapW);    // para (hapësirë për derën)
+      side(x1, z0, x1, z1, 0, 0);          // djathtas
+      side(x0, z1, x0, z0, 0, 0);          // majtas
+    }
 
     if (type === 'modern') {
       wall(10, 0, -4, 0); wall(10, 0, 4, 0); wall(8, -5, 0, Math.PI / 2); wall(8, 5, 0, Math.PI / 2);
@@ -1033,6 +1048,7 @@
       furn('sofa', -2.2, -2.6, 0); furn('coffee-table', -2.2, -1.7, 0); furn('tv', -2.2, -3.5, Math.PI);
       furn('kitchen-counter', 3.2, -2.9, 0); furn('sink', 3.2, -2.0, 0); furn('fridge', 4.3, -3.2, 0);
       furn('bed', 3.3, 2.6, 0); furn('lamp', -4.3, 2.6, 0); furn('rug', 0.5, 0.5, 0);
+      fenceRect(-6.5, 6.5, -5.5, 5.5, 0, 3);
     } else if (type === 'traditional') {
       wall(8, 0, -3, 0); wall(8, 0, 3, 0); wall(6, -4, 0, Math.PI / 2); wall(6, 4, 0, Math.PI / 2);
       win(1.4, 1.2, -2, 2.1, -3.15, 0); win(1.4, 1.2, 2, 2.1, -3.15, 0);
@@ -1042,6 +1058,7 @@
       put(makeChimney('#8a6a4a', 'brick'), 2.5, WALL_H + 0.8, -1.8, 0);
       furn('sofa', -2.2, -2, 0); furn('table', 1.8, -2, 0); furn('chair', 1.2, -1.2, 0); furn('chair', 2.4, -1.2, 0);
       furn('bed', 2.6, 2, Math.PI / 2); furn('shelf', -3.2, 2.2, Math.PI / 2); furn('lamp', -0.5, 0.5, 0);
+      fenceRect(-5.5, 5.5, -4.5, 4.5, 0, 3);
     } else if (type === 'villa') {
       wall(12, 0, -4, 0); wall(12, 0, 4, 0); wall(8, -6, 0, Math.PI / 2); wall(8, 6, 0, Math.PI / 2);
       win(2, 1.3, -4, 1.7, -4.15, 0); win(2, 1.3, 4, 1.7, -4.15, 0);
@@ -1058,9 +1075,10 @@
       furn('bed', -3.5, 2.6, 0, 1); furn('bed', 3.5, 2.6, 0, 1); furn('wardrobe', -5, -2, Math.PI / 2, 1);
       furn('bathtub', 4, -2, 0, 1); furn('toilet', 5, -1, 0, 1); furn('sink', 2, -3, 0, 1);
       put(makeFlatRoof(12.6, 8.6, SLATE, 'metal'), 0, FLOOR_H + WALL_H + 0.12, 0, 0);
-      put(makeOutdoor('pool'), 0, 0, 8, 0, 0);
+      put(makeOutdoor('pool'), 0, 0, 7, 0, 0);
       put(makeOutdoor('tree'), -7, 0, 5, 0, 0);
       put(makeOutdoor('tree'), 7, 0, 5, 0, 0);
+      fenceRect(-8, 8, -6, 9, 0, 4);
     } else if (type === 'cottage') {
       wall(6, 0, -2.5, 0); wall(6, 0, 2.5, 0); wall(5, -3, 0, Math.PI / 2); wall(5, 3, 0, Math.PI / 2);
       win(1.2, 1.1, -1.5, 1.8, -2.65, 0); win(1.2, 1.1, 1.5, 1.8, -2.65, 0);
@@ -1068,6 +1086,7 @@
       put(makePyramidRoof(7, 6, 1.6, ROOFD, 'wood'), 0, WALL_H + 0.8, 0, 0);
       furn('bed', -1.8, -1.3, 0); furn('sofa', 1.5, -1.5, 0); furn('table', 1.5, 1.2, 0); furn('chair', 1.5, 1.8, 0);
       furn('lamp', -2.2, 1.4, 0); furn('rug', 0, 0, 0);
+      fenceRect(-4.5, 4.5, -4, 4, 0, 3);
     }
 
     parts.forEach(function (p) { scene.add(p); allParts.push(p); });
@@ -1940,11 +1959,18 @@
     controls.target.set(c.x, floorBase + 1.7, c.z + 1);
     hiddenInside = [];
     allParts.forEach(function (p) {
-      if (p.userData.kind === 'wall' || p.userData.kind === 'roof' || p.userData.kind === 'slab' || p.userData.kind === 'foundation' || p.userData.kind === 'chimney') {
+      var k = p.userData.kind;
+      if (k === 'wall' || k === 'roof' || k === 'slab' || k === 'foundation' || k === 'chimney') {
         hiddenInside.push(p);
+        var isWall = (k === 'wall');
         p.traverse(function (cc) {
           if (cc.isMesh) cc.castShadow = false;
-          if (cc.material) { cc.material.transparent = true; cc.material.opacity = 0.12; cc.material.depthWrite = false; cc.material.needsUpdate = true; }
+          if (cc.material) {
+            cc.material.transparent = true;
+            cc.material.opacity = isWall ? 0.5 : 0.08;
+            cc.material.depthWrite = isWall;
+            cc.material.needsUpdate = true;
+          }
         });
       }
     });

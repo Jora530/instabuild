@@ -17,11 +17,12 @@
   if (backdrop) backdrop.addEventListener('click', closeNav);
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeNav(); });
 
-  // highlight the link for the current page
+  // highlight the link for the current page (only real .html links)
   var file = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
   panel.querySelectorAll('a').forEach(function (a) {
     var href = (a.getAttribute('href') || '').toLowerCase();
-    var hFile = href.split('#')[0] || 'index.html';
+    var idx = href.indexOf('.html');
+    var hFile = idx === -1 ? null : href.slice(0, idx + 5);
     if (hFile === file) a.classList.add('active');
   });
 })();

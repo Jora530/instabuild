@@ -2186,7 +2186,7 @@
   /* ============================================================
      UDHËRRËFYESI (NPC) — shpjegon lojën hap pas hapi
      ============================================================ */
-  var guide = { npc: null, bubble: null, step: 0, t: 0, done: {} };
+  var guide = { step: 0, done: {}, visible: false };
   var lastPraiseTime = 0;
   var PRAISES = ['Good job! 👍', 'Well done! ✨', 'Bravo! 👏', 'Shumë mirë! 🎉', 'Vazhdo kështu! 💪', 'Perfekt! 🌟', 'Të lumtë! 🏆', 'Awesome! 🔥'];
   var guideSteps = [
@@ -2203,106 +2203,24 @@
 
   function randomPraise() { return PRAISES[Math.floor(Math.random() * PRAISES.length)]; }
 
-  function roundRectPath(ctx, x, y, w, h, r) {
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.arcTo(x + w, y, x + w, y + h, r);
-    ctx.arcTo(x + w, y + h, x, y + h, r);
-    ctx.arcTo(x, y + h, x, y, r);
-    ctx.arcTo(x, y, x + w, y, r);
-    ctx.closePath();
-  }
-
-  function bubbleTexture(text, praise) {
-    var padX = 20, padY = 16, fontSize = 26, lineH = 36, maxW = 430;
-    var c = document.createElement('canvas');
-    var ctx = c.getContext('2d');
-    ctx.font = '600 ' + fontSize + 'px Inter, "Segoe UI", sans-serif';
-    var words = text.split(' ');
-    var lines = [], cur = '';
-    for (var i = 0; i < words.length; i++) {
-      var test = cur ? cur + ' ' + words[i] : words[i];
-      if (ctx.measureText(test).width > maxW && cur) { lines.push(cur); cur = words[i]; }
-      else cur = test;
-    }
-    if (cur) lines.push(cur);
-    var w = maxW + padX * 2;
-    var h = lines.length * lineH + padY * 2 + 14;
-    c.width = w; c.height = h;
-    ctx = c.getContext('2d');
-    ctx.font = '600 ' + fontSize + 'px Inter, "Segoe UI", sans-serif';
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    roundRectPath(ctx, 2, 2, w - 4, h - 16, 20);
-    ctx.fillStyle = praise ? '#eaf6df' : '#ffffff';
-    ctx.fill();
-    ctx.strokeStyle = praise ? '#6b8e23' : '#c9d3b8';
-    ctx.lineWidth = 3;
-    ctx.stroke();
-    ctx.fillStyle = praise ? '#eaf6df' : '#ffffff';
-    ctx.beginPath(); ctx.moveTo(w / 2 - 11, h - 17); ctx.lineTo(w / 2 + 11, h - 17); ctx.lineTo(w / 2, h + 1); ctx.closePath(); ctx.fill();
-    ctx.fillStyle = '#333d1f';
-    var y = padY + lineH / 2 + 6;
-    for (var j = 0; j < lines.length; j++) { ctx.fillText(lines[j], w / 2, y); y += lineH; }
-    return new THREE.CanvasTexture(c);
-  }
-
   function guideSay(text, praise) {
-    if (!guide.bubble) return;
-    if (guide.bubble.material.map) guide.bubble.material.map.dispose();
-    guide.bubble.material.map = bubbleTexture(text, praise);
-    guide.bubble.material.needsUpdate = true;
-    var img = guide.bubble.material.map.image;
-    guide.bubble.scale.set(img.width / 75, img.height / 75, 1);
-  }
-
-  function makeGuide() {
-    var g = new THREE.Group();
-    var skin = mat(0xe8b88a), vest = mat(0xff8c1a), pants = mat(0x2c3e50), hatY = mat(0xf1c40f), hatB = mat(0xd9a400);
-    var body = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.7, 0.28), vest); body.position.y = 1.35; g.add(body);
-    var head = new THREE.Mesh(new THREE.SphereGeometry(0.22, 10, 8), skin); head.position.y = 1.95; g.add(head);
-    var helm = new THREE.Mesh(new THREE.CylinderGeometry(0.27, 0.27, 0.2, 14), hatY); helm.position.y = 2.13; g.add(helm);
-    var brim = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.36, 0.05, 14), hatB); brim.position.y = 2.05; g.add(brim);
-    var leftArm = new THREE.Group(); leftArm.position.set(-0.32, 1.55, 0);
-    var la = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.55, 0.14), vest); la.position.y = -0.27; leftArm.add(la); g.add(leftArm);
-    var rightArm = new THREE.Group(); rightArm.position.set(0.32, 1.55, 0);
-    var ra = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.55, 0.14), vest); ra.position.y = -0.27; rightArm.add(ra); g.add(rightArm);
-    var ll = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.55, 0.16), pants); ll.position.set(-0.12, 0.27, 0); g.add(ll);
-    var rl = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.55, 0.16), pants); rl.position.set(0.12, 0.27, 0); g.add(rl);
-    g.userData.guide = true;
-    g.userData.rightArm = rightArm;
-    scene.add(g);
-    return g;
-  }
-
-  function makeBubble() {
-    var m = new THREE.SpriteMaterial({ map: bubbleTexture('', false), transparent: true, depthTest: false });
-    var s = new THREE.Sprite(m);
-    s.renderOrder = 999;
-    scene.add(s);
-    return s;
+    var bubble = document.getElementById('guide-bubble');
+    var wrap = document.getElementById('guide-2d');
+    if (!bubble || !wrap) return;
+    bubble.textContent = text;
+    bubble.classList.toggle('praise', !!praise);
+    wrap.classList.remove('hidden');
+    guide.visible = true;
   }
 
   function initGuide() {
-    guide.npc = makeGuide();
-    guide.npc.position.set(6, 0, 6);
-    guide.bubble = makeBubble();
     guide.step = 0;
     guide.done = {};
-    guide.t = 0;
-    guideSay('👋 Mirë se erdhe në InstaBuild! Unë jam Nino. Zgjidh një shtëpi të gatshme në tab "Shtëpi", ose vizato vetë planimetrinë në 2D e pastaj shëtit në 3D. Ndiq hapat e mi!', false);
+    guide.visible = false;
+    guideSay('👋 Mirë se erdhe në InstaBuild! Unë jam Nino. Zgjidh një shtëpi të gatshme në tab "Shtëpi", ose vizato vetë planimetrinë. Ndiq hapat e mi!', false);
     setTimeout(function () {
-      if (guide.npc && guide.step < guideSteps.length) guideSay(guideSteps[guide.step].hint, false);
+      if (guide.visible && guide.step < guideSteps.length) guideSay(guideSteps[guide.step].hint, false);
     }, 4500);
-  }
-
-  function guideTick(dt) {
-    if (!guide.npc) return;
-    guide.t += dt;
-    var s = Math.sin(guide.t * 2.4);
-    guide.npc.position.y = s * 0.04;
-    if (guide.npc.userData.rightArm) guide.npc.userData.rightArm.rotation.z = -0.4 + s * 0.55;
-    guide.npc.rotation.y = Math.atan2(camera.position.x - guide.npc.position.x, camera.position.z - guide.npc.position.z);
-    if (guide.bubble) guide.bubble.position.set(guide.npc.position.x, guide.npc.position.y + 2.9, guide.npc.position.z);
   }
 
   function stepIdForKind(kind) {
@@ -2319,7 +2237,7 @@
   }
 
   function guideNotify(id) {
-    if (!guide || !guide.npc || !id) return;
+    if (!guide || !id) return;
     guide.done[id] = true;
     var advanced = false;
     while (guide.step < guideSteps.length && guide.done[guideSteps[guide.step].id]) {
@@ -2330,7 +2248,7 @@
       guideSay(praiseFor(id), true);
       var next = guide.step;
       setTimeout(function () {
-        if (guide.npc && next === guide.step) {
+        if (guide.visible && next === guide.step) {
           if (next < guideSteps.length) guideSay(guideSteps[next].hint, false);
           else guideSay('🎉 E përfundove mësimin! Tani je gati të ndërtosh çfarë të duash! ' + randomPraise(), true);
         }
@@ -2490,7 +2408,6 @@
     if (controls.enabled) controls.update();
     updateInsideMovement();
     animateWorld(dt);
-    guideTick(dt);
     if (selectionBox && selectedPart) selectionBox.update();
     renderer.render(scene, camera);
   }
@@ -2532,7 +2449,7 @@
     get mode() { return modeAction; },
     get env() { return state.env; },
     get guideStep() { return guide.step; },
-    get guideVisible() { return !!guide.npc; },
+    get guideVisible() { return guide.visible; },
     get firstWall() {
       for (var i = 0; i < allParts.length; i++) {
         if (allParts[i].userData.kind === 'wall') {

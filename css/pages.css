@@ -17,11 +17,11 @@
 .page-hero .page-hero-bg {
   position: absolute; inset: 0;
   background-size: cover; background-position: center;
-  opacity: 0.32;
+  opacity: 0.9;
 }
 .page-hero::after {
   content: ''; position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(27,33,14,0.55), rgba(27,33,14,0.28));
+  background: linear-gradient(90deg, rgba(27,33,14,0.72) 0%, rgba(27,33,14,0.35) 55%, rgba(27,33,14,0.08) 100%);
 }
 .page-hero .container { position: relative; z-index: 2; color: #fff; }
 .page-hero-kicker {

@@ -205,24 +205,35 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Inter', 
 }
 .toast.show { opacity: 1; }
 
-/* ---------- Side panels ---------- */
-.side-panel {
+/* ---------- Side panels (të dyja në të majtë, të stivuara) ---------- */
+.left-stack {
   position: fixed;
   top: 86px;
   left: 16px;
-  width: 236px;
+  width: 250px;
+  max-height: calc(100vh - 120px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  z-index: 85;
+  pointer-events: auto;
+  padding-right: 4px;
+}
+.side-panel {
+  position: static;
+  width: 100%;
+  flex: 0 0 auto;
   background: rgba(255,255,255,0.97);
   border-radius: 18px;
   padding: 14px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-  z-index: 85;
   pointer-events: auto;
   border: 1px solid #dfe6cd;
-  max-height: calc(100vh - 130px);
   display: flex;
   flex-direction: column;
 }
-.side-panel.right { left: auto; right: 16px; width: 264px; }
+.side-panel.right { width: 100%; }
 .panel-title { font-family: 'Cormorant Garamond', serif; font-size: 1.15rem; font-weight: 700; color: #333d1f; text-align: center; margin-bottom: 8px; }
 .panel-hint { text-align: center; font-size: 0.72rem; color: #5a6644; margin-top: 8px; }
 
@@ -267,6 +278,19 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Inter', 
 .tool-btn.house .pico { font-size: 1.6rem; }
 
 /* ---------- Style panel ---------- */
+.resize-panel {
+  background: #f4f7ec;
+  border: 1px solid #dfe6cd;
+  border-radius: 12px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+.resize-title { font-size: 0.78rem; font-weight: 700; color: #333d1f; text-align: center; margin-bottom: 6px; }
+.resize-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; font-size: 0.72rem; color: #5a6644; }
+.resize-row label { width: 34px; font-weight: 600; }
+.resize-row input[type=range] { flex: 1; accent-color: #556b2f; cursor: pointer; }
+.resize-val { width: 44px; text-align: right; font-weight: 700; color: #333d1f; font-variant-numeric: tabular-nums; }
+
 .style-row { display: flex; gap: 12px; }
 .style-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
 #colorwheel { border-radius: 50%; cursor: crosshair; box-shadow: 0 0 0 2px #fff, 0 4px 16px rgba(0,0,0,0.2); width: 150px; height: 150px; }
@@ -360,7 +384,6 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Inter', 
 
 @media (max-width: 640px) {
   .screen-card { padding: 24px 16px; }
-  .side-panel { width: 200px; }
-  .side-panel.right { width: 210px; }
+  .left-stack { width: 200px; }
   .hud-tip { display: none; }
 }

@@ -20,7 +20,7 @@
   /* ---------------- Three.js ---------------- */
   var canvas = document.getElementById('game-canvas');
   var renderer, scene, camera, controls, raycaster, pointer;
-  var sun, hemi, gridHelper, nightLight, skyDome;
+  var sun, hemi, gridHelper, nightLight, skyDome, insideLight;
   var clock = new THREE.Clock();
   var keys = {};
 
@@ -30,6 +30,9 @@
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    if (THREE.ACESFilmicToneMapping !== undefined) renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.08;
+    if (THREE.sRGBEncoding !== undefined) renderer.outputEncoding = THREE.sRGBEncoding;
 
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0x9fc3e0);
@@ -939,8 +942,12 @@
         box(2.2, 1.1, 0.6, green, 0, 0.55, 0);
         break;
       case 'pool':
-        box(4, 0.12, 2.5, mat(0xd9d9d9), 0, 0.06, 0);
-        box(3.8, 0.08, 2.3, mat(0x4a90c4, { transparent: true, opacity: 0.9 }), 0, 0.12, 0);
+        box(4.3, 0.14, 2.8, mat(0xf0f0ee), 0, 0.06, 0);
+        box(3.95, 0.1, 2.45, mat(0x86c7e0, { transparent: true, opacity: 0.45 }), 0, 0.1, 0);
+        var poolWater = new THREE.Mesh(new THREE.BoxGeometry(3.9, 0.05, 2.4), new THREE.MeshLambertMaterial({ color: 0x37a6d8, emissive: 0x0d4a70, emissiveIntensity: 0.4, transparent: true, opacity: 0.75 }));
+        poolWater.position.set(0, 0.15, 0); g.add(poolWater);
+        box(0.1, 0.55, 0.55, metal, 1.85, 0.32, 1.0);
+        box(0.1, 0.55, 0.55, metal, 1.85, 0.32, 0.7);
         break;
       case 'grill':
         box(0.05, 0.6, 0.05, metal, -0.25, 0.25, 0);
@@ -1051,6 +1058,9 @@
       furn('bed', -3.5, 2.6, 0, 1); furn('bed', 3.5, 2.6, 0, 1); furn('wardrobe', -5, -2, Math.PI / 2, 1);
       furn('bathtub', 4, -2, 0, 1); furn('toilet', 5, -1, 0, 1); furn('sink', 2, -3, 0, 1);
       put(makeFlatRoof(12.6, 8.6, SLATE, 'metal'), 0, FLOOR_H + WALL_H + 0.12, 0, 0);
+      put(makeOutdoor('pool'), 0, 0, 8, 0, 0);
+      put(makeOutdoor('tree'), -7, 0, 5, 0, 0);
+      put(makeOutdoor('tree'), 7, 0, 5, 0, 0);
     } else if (type === 'cottage') {
       wall(6, 0, -2.5, 0); wall(6, 0, 2.5, 0); wall(5, -3, 0, Math.PI / 2); wall(5, 3, 0, Math.PI / 2);
       win(1.2, 1.1, -1.5, 1.8, -2.65, 0); win(1.2, 1.1, 1.5, 1.8, -2.65, 0);
@@ -1147,6 +1157,8 @@
   var selectedPart = null;
   var selectionBox = null;
   var moveStart = null;       // { pos, ry } origjinale për undo
+  var resizeTarget = null;
+  var resizeStartW = 0, resizeStartH = 0;
 
   var floorPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 
@@ -1365,6 +1377,20 @@
       }
       return;
     }
+    if (modeAction === 'resize') {
+      var hitsR = raycaster.intersectObjects(scene.children, true);
+      for (var ri = 0; ri < hitsR.length; ri++) {
+        var tpr = topPart(hitsR[ri].object);
+        if (tpr && tpr.userData.kind === 'wall') {
+          selectPart(tpr);
+          showResizePanel(tpr);
+          return;
+        }
+      }
+      deselectPart();
+      hideResizePanel();
+      return;
+    }
     if (!currentTool) return;
 
     var tool = currentTool;
@@ -1558,6 +1584,52 @@
     selectedPart = null;
   }
 
+  /* ---------- resize muri (anash + lart) ---------- */
+  function resizeWall(obj, w, h) {
+    var d = obj.userData.d || 0.25;
+    var ng = new THREE.BoxGeometry(w, h, d);
+    obj.geometry.dispose();
+    obj.geometry = ng;
+    obj.userData.w = w; obj.userData.h = h;
+    var fb = (obj.userData.floor || 0) * FLOOR_H;
+    obj.position.y = fb + h / 2;
+    if (selectionBox && selectedPart === obj) selectionBox.update();
+    broadcast({ t: 'resize', id: obj.userData.id, w: w, h: h });
+  }
+  function updateResizeLabels() {
+    var wSlider = document.getElementById('resize-w');
+    var hSlider = document.getElementById('resize-h');
+    if (wSlider) document.getElementById('resize-w-val').textContent = (+wSlider.value).toFixed(1) + ' m';
+    if (hSlider) document.getElementById('resize-h-val').textContent = (+hSlider.value).toFixed(1) + ' m';
+  }
+  function showResizePanel(obj) {
+    var panel = document.getElementById('resize-panel');
+    var wSlider = document.getElementById('resize-w');
+    var hSlider = document.getElementById('resize-h');
+    if (!panel || !wSlider || !hSlider) return;
+    resizeTarget = obj;
+    resizeStartW = obj.userData.w || 4;
+    resizeStartH = obj.userData.h || WALL_H;
+    wSlider.value = resizeStartW;
+    hSlider.value = resizeStartH;
+    updateResizeLabels();
+    panel.classList.remove('hidden');
+  }
+  function hideResizePanel() {
+    var panel = document.getElementById('resize-panel');
+    if (panel) panel.classList.add('hidden');
+    resizeTarget = null;
+  }
+  function commitResize() {
+    if (!resizeTarget) return;
+    var o = resizeTarget;
+    var sw = resizeStartW, sh = resizeStartH;
+    var ew = parseFloat(document.getElementById('resize-w').value);
+    var eh = parseFloat(document.getElementById('resize-h').value);
+    resizeStartW = ew; resizeStartH = eh;
+    pushUndo(function () { resizeWall(o, sw, sh); }, function () { resizeWall(o, ew, eh); });
+  }
+
   /* ============================================================
      UI: tools, tabs, floor bar, color wheel, materials
      ============================================================ */
@@ -1592,6 +1664,7 @@
   function setTool(tool) {
     currentTool = tool;
     modeAction = null;
+    hideResizePanel();
     clearGhost();
     cancelDraws();
     if (wallDraw) { if (wallDraw.preview) { scene.remove(wallDraw.preview); disposeObj(wallDraw.preview); } wallDraw = null; }
@@ -1618,13 +1691,14 @@
   }
 
   function setModeAction(action) {
-    if (modeAction === action) { modeAction = null; }
-    else { modeAction = action; currentTool = null; clearGhost(); cancelDraws(); deselectPart(); }
+    if (modeAction === action) { modeAction = null; hideResizePanel(); }
+    else { modeAction = action; currentTool = null; clearGhost(); cancelDraws(); deselectPart(); if (action !== 'resize') hideResizePanel(); }
     setModeButtons();
     buildToolList();
     if (modeAction === 'paint') setHint('Kliko një pjesë për ta lyer me ngjyrën/materialin e zgjedhur');
     else if (modeAction === 'move') setHint('Kliko një pjesë për ta lëvizur · Q/E rrotullim');
     else if (modeAction === 'delete') setHint('Kliko një pjesë për ta fshirë');
+    else if (modeAction === 'resize') setHint('Kliko një MUR për ta zmadhuar anash e lart');
     else setHint('Zgjidh një mjet ose përdor mjete transformimi');
     updateEditMode();
   }
@@ -1633,6 +1707,7 @@
     setActive('btn-move', modeAction === 'move');
     setActive('btn-paint', modeAction === 'paint');
     setActive('btn-delete', modeAction === 'delete');
+    setActive('btn-resize', modeAction === 'resize');
     setActive('btn-snap', snapOn);
   }
   function setActive(id, on) {
@@ -1842,23 +1917,40 @@
   var lookDown = false;
   var hiddenInside = [];
 
+  function houseCenter() {
+    var sx = 0, sz = 0, n = 0;
+    for (var i = 0; i < allParts.length; i++) {
+      var p = allParts[i];
+      var k = p.userData.kind;
+      if (k === 'wall' || k === 'slab' || k === 'foundation' || k === 'roof') {
+        sx += p.position.x; sz += p.position.z; n++;
+      }
+    }
+    return n === 0 ? { x: 0, z: 0 } : { x: sx / n, z: sz / n };
+  }
+
   function enterInside() {
-    var cx = 0, cz = 0;
+    var c = houseCenter();
     var floorBase = baseY();
     wasCameraPos = camera.position.clone();
     wasTarget = controls.target.clone();
-    camera.position.set(cx, floorBase + 1.7, cz);
-    controls.target.set(cx, floorBase + 1.5, cz);
-    controls.update();
+    camera.position.set(c.x, floorBase + 1.7, c.z);
+    euler.set(0, Math.PI, 0, 'YXZ');
+    camera.quaternion.setFromEuler(euler);
+    controls.target.set(c.x, floorBase + 1.7, c.z + 1);
     hiddenInside = [];
     allParts.forEach(function (p) {
       if (p.userData.kind === 'wall' || p.userData.kind === 'roof' || p.userData.kind === 'slab' || p.userData.kind === 'foundation' || p.userData.kind === 'chimney') {
         hiddenInside.push(p);
-        p.traverse(function (c) {
-          if (c.material) { c.material.transparent = true; c.material.opacity = 0.15; c.material.depthWrite = false; }
+        p.traverse(function (cc) {
+          if (cc.isMesh) cc.castShadow = false;
+          if (cc.material) { cc.material.transparent = true; cc.material.opacity = 0.12; cc.material.depthWrite = false; cc.material.needsUpdate = true; }
         });
       }
     });
+    insideLight = new THREE.PointLight(0xfff2d8, 1.2, 32, 1.7);
+    insideLight.position.set(c.x, floorBase + 2.6, c.z);
+    scene.add(insideLight);
     insideActive = true;
     document.getElementById('btn-inside').textContent = '🏞️ Dil jashtë';
     document.getElementById('inside-hint').classList.remove('hidden');
@@ -1867,7 +1959,6 @@
     window.addEventListener('mousemove', onInsideLook);
     window.addEventListener('keydown', onInsideKey);
     window.addEventListener('keyup', onInsideKeyUp);
-    euler.setFromQuaternion(camera.quaternion);
     toast('🚪 Je brenda! Lëviz me WASD');
     guideNotify('inside');
   }
@@ -1875,6 +1966,7 @@
     insideActive = false;
     document.getElementById('btn-inside').textContent = '🚪 Shiko brenda';
     document.getElementById('inside-hint').classList.add('hidden');
+    if (insideLight) { scene.remove(insideLight); insideLight = null; }
     if (wasCameraPos) camera.position.copy(wasCameraPos);
     if (wasTarget) controls.target.copy(wasTarget);
     controls.enabled = true;
@@ -1883,8 +1975,9 @@
     window.removeEventListener('keydown', onInsideKey);
     window.removeEventListener('keyup', onInsideKeyUp);
     hiddenInside.forEach(function (p) {
-      p.traverse(function (c) {
-        if (c.material) { c.material.transparent = false; c.material.opacity = 1; c.material.depthWrite = true; }
+      p.traverse(function (cc) {
+        if (cc.isMesh) cc.castShadow = true;
+        if (cc.material) { cc.material.transparent = false; cc.material.opacity = 1; cc.material.depthWrite = true; cc.material.needsUpdate = true; }
       });
     });
     hiddenInside = [];
@@ -2028,6 +2121,9 @@
     } else if (msg.t === 'move') {
       var t3 = allParts.filter(function (p) { return p.userData.id === msg.id; })[0];
       if (t3) { t3.position.x = msg.x; t3.position.z = msg.z; t3.rotation.y = msg.ry; }
+    } else if (msg.t === 'resize') {
+      var t4 = allParts.filter(function (p) { return p.userData.id === msg.id; })[0];
+      if (t4 && t4.userData.kind === 'wall') resizeWall(t4, msg.w, msg.h);
     }
     // hosti i përcjell ndryshimet te lojtarët e tjerë
     if (isHost && peerConnections.length > 1) {
@@ -2316,6 +2412,7 @@
   bindAction('btn-move', function () { setModeAction('move'); });
   bindAction('btn-paint', function () { setModeAction('paint'); });
   bindAction('btn-delete', function () { setModeAction('delete'); });
+  bindAction('btn-resize', function () { setModeAction('resize'); });
   bindAction('btn-snap', function () { snapOn = !snapOn; setModeButtons(); toast(snapOn ? '📏 Snap i aktivizuar' : '📏 Snap i çaktivizuar'); });
   bindAction('btn-rot-cw', function () { rotateBy(5 * Math.PI / 180); });
   bindAction('btn-rot-ccw', function () { rotateBy(-5 * Math.PI / 180); });
@@ -2324,6 +2421,19 @@
   bindAction('btn-redo', redoLast);
 
   document.getElementById('time-slider').addEventListener('input', function () { setTimeOfDay(parseInt(this.value, 10)); });
+
+  document.getElementById('resize-w').addEventListener('input', function () {
+    if (!resizeTarget) return;
+    updateResizeLabels();
+    resizeWall(resizeTarget, parseFloat(this.value), parseFloat(document.getElementById('resize-h').value));
+  });
+  document.getElementById('resize-h').addEventListener('input', function () {
+    if (!resizeTarget) return;
+    updateResizeLabels();
+    resizeWall(resizeTarget, parseFloat(document.getElementById('resize-w').value), parseFloat(this.value));
+  });
+  document.getElementById('resize-w').addEventListener('change', commitResize);
+  document.getElementById('resize-h').addEventListener('change', commitResize);
 
   document.querySelectorAll('#tool-tabs .tab').forEach(function (tab) {
     tab.addEventListener('click', function () {

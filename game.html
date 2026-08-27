@@ -47,6 +47,7 @@
       </div>
     </div>
 
+    <div class="left-stack">
     <!-- Paneli i ndërtimit (majtas) -->
     <div class="side-panel" id="panel-build">
       <div class="panel-title">🔨 Ndërto</div>
@@ -61,9 +62,24 @@
       <div class="panel-hint" id="tool-hint">Kliko në tokë për të vendosur</div>
     </div>
 
-    <!-- Paneli i stilit (djathtas): ngjyra + materiale + transform -->
-    <div class="side-panel right" id="panel-style">
+    <!-- Paneli i stilit (majtas, nën panelin e ndërtimit) -->
+    <div class="side-panel" id="panel-style">
       <div class="panel-title">🎨 Stili</div>
+
+      <div class="resize-panel hidden" id="resize-panel">
+        <div class="resize-title">📏 Zmadho murin</div>
+        <div class="resize-row">
+          <label>Anash</label>
+          <input type="range" id="resize-w" min="1" max="20" step="0.1" value="4">
+          <span class="resize-val" id="resize-w-val">4.0 m</span>
+        </div>
+        <div class="resize-row">
+          <label>Lart</label>
+          <input type="range" id="resize-h" min="1" max="6" step="0.1" value="2.7">
+          <span class="resize-val" id="resize-h-val">2.7 m</span>
+        </div>
+      </div>
+
       <div class="style-row">
         <div class="style-col">
           <canvas id="colorwheel" width="160" height="160"></canvas>
@@ -85,6 +101,7 @@
         <button class="btn-game btn-ghost small" id="btn-move" type="button">✋ Lëviz</button>
         <button class="btn-game btn-ghost small" id="btn-paint" type="button">🖌️ Lyej</button>
         <button class="btn-game btn-ghost small" id="btn-delete" type="button">🗑️ Fshi</button>
+        <button class="btn-game btn-ghost small" id="btn-resize" type="button">📏 Zmadho</button>
         <button class="btn-game btn-ghost small" id="btn-snap" type="button">📏 Snap</button>
       </div>
       <div class="rot-row">
@@ -98,9 +115,10 @@
         <button class="btn-game btn-ghost small" id="btn-redo" type="button">↪️ Rikthe</button>
       </div>
     </div>
+    </div>
 
     <div class="hud-bottom">
-      <div class="hud-tip">📐 Vizato planimetrinë në <b>2D</b>: kliko e tërhiq për mure · <b>Q/E</b> rrotullim · <b>R</b> 90° · <b>Shift</b> snap · kalo në <b>3D</b> me butonin 📐2D · Brenda: WASD</div>
+      <div class="hud-tip">📐 Vizato planimetrinë në <b>2D</b>: kliko e tërhiq për mure · <b>Q/E</b> rrotullim · <b>R</b> 90° · <b>📏 Zmadho</b> = kliko një mur e rrite anash/lart · kalo në <b>3D</b> me 📐2D · Brenda: WASD</div>
       <div class="toast" id="toast"></div>
     </div>
   </div>

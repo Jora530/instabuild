@@ -1981,13 +1981,13 @@
       var k = p.userData.kind;
       if (k === 'wall' || k === 'roof' || k === 'slab' || k === 'foundation' || k === 'chimney') {
         hiddenInside.push(p);
-        var isWall = (k === 'wall');
+        var op = k === 'wall' ? 1.0 : (k === 'slab' ? 0.25 : 0.06);
         p.traverse(function (cc) {
           if (cc.isMesh) cc.castShadow = false;
           if (cc.material) {
             cc.material.transparent = true;
-            cc.material.opacity = isWall ? 1.0 : 0.06;
-            cc.material.depthWrite = isWall;
+            cc.material.opacity = op;
+            cc.material.depthWrite = (k === 'wall');
             cc.material.needsUpdate = true;
           }
         });
@@ -2043,6 +2043,16 @@
     keys[e.key.toLowerCase()] = false;
     if (e.key === 'Shift') lookDown = false;
   }
+  function findStairsNear(x, z, radius) {
+    for (var i = 0; i < allParts.length; i++) {
+      var p = allParts[i];
+      if (p.userData.kind !== 'stairs') continue;
+      var dx = x - p.position.x, dz = z - p.position.z;
+      if (dx * dx + dz * dz < radius * radius) return true;
+    }
+    return false;
+  }
+
   function updateInsideMovement() {
     if (!insideActive) return;
     var speed = 0.12;
@@ -2051,16 +2061,35 @@
     camera.getWorldDirection(dir);
     var right = new THREE.Vector3().crossVectors(dir, camera.up).normalize();
     var move = new THREE.Vector3();
-    if (keys['w'] || keys['arrowup']) move.add(dir);
-    if (keys['s'] || keys['arrowdown']) move.sub(dir);
+    var fwd = false, back = false;
+    if (keys['w'] || keys['arrowup']) { move.add(dir); fwd = true; }
+    if (keys['s'] || keys['arrowdown']) { move.sub(dir); back = true; }
     if (keys['a'] || keys['arrowleft']) move.sub(right);
     if (keys['d'] || keys['arrowright']) move.add(right);
+    var onStairs = findStairsNear(camera.position.x, camera.position.z, 2.4);
     if (move.lengthSq() > 0) {
-      move.normalize().multiplyScalar(speed);
+      move.normalize().multiplyScalar(onStairs ? speed * 0.55 : speed);
       camera.position.x += move.x;
       camera.position.z += move.z;
-      var lo = baseY() + 1.4, hi = baseY() + FLOOR_H - 0.3;
-      camera.position.y = Math.max(lo, Math.min(hi, camera.position.y));
+    }
+    // ngjitja/zbritja e shkallëve
+    if (onStairs) {
+      if (fwd) camera.position.y += 0.09;
+      if (back) camera.position.y -= 0.09;
+    }
+    var maxFloor = Math.max(0, state.floorCount - 1);
+    var lo = 1.4, hi = maxFloor * FLOOR_H + FLOOR_H - 0.3;
+    camera.position.y = Math.max(lo, Math.min(hi, camera.position.y));
+    var nearestFloor = Math.round((camera.position.y - 1.4) / FLOOR_H);
+    nearestFloor = Math.max(0, Math.min(maxFloor, nearestFloor));
+    if (!onStairs) {
+      var targetY = nearestFloor * FLOOR_H + 1.4;
+      camera.position.y += (targetY - camera.position.y) * 0.25;
+    }
+    if (nearestFloor !== state.currentFloor) {
+      state.currentFloor = nearestFloor;
+      buildFloorBar();
+      toast(nearestFloor === 0 ? '🏠 Katit përdhes' : '🏢 Kati ' + nearestFloor);
     }
   }
 

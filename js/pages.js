@@ -23,6 +23,16 @@
     });
   }
 
+  /* Mobile dropdown toggle */
+  document.querySelectorAll('.dropdown > a').forEach(function (link) {
+    link.addEventListener('click', function (e) {
+      if (window.innerWidth <= 768) {
+        e.preventDefault();
+        link.parentElement.classList.toggle('open');
+      }
+    });
+  });
+
   /* Reveal on scroll */
   if ('IntersectionObserver' in window) {
     var io = new IntersectionObserver(function (entries) {

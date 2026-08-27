@@ -933,10 +933,10 @@
         }
         break;
       case 'fence':
-        box(2.4, 0.9, 0.05, mat(0xc9b896), 0, 0.45, 0);
-        box(0.07, 1.0, 0.07, mat(0x8a7355), -1.15, 0.5, 0);
-        box(0.07, 1.0, 0.07, mat(0x8a7355), 0, 0.5, 0);
-        box(0.07, 1.0, 0.07, mat(0x8a7355), 1.15, 0.5, 0);
+        box(2.4, 1.2, 0.05, mat(0xc9b896), 0, 0.6, 0);
+        box(0.07, 1.4, 0.07, mat(0x8a7355), -1.15, 0.7, 0);
+        box(0.07, 1.4, 0.07, mat(0x8a7355), 0, 0.7, 0);
+        box(0.07, 1.4, 0.07, mat(0x8a7355), 1.15, 0.7, 0);
         break;
       case 'hedge':
         box(2.2, 1.1, 0.6, green, 0, 0.55, 0);
@@ -1049,6 +1049,12 @@
       furn('kitchen-counter', 3.2, -2.9, 0); furn('sink', 3.2, -2.0, 0); furn('fridge', 4.3, -3.2, 0);
       furn('bed', 3.3, 2.6, 0); furn('lamp', -4.3, 2.6, 0); furn('rug', 0.5, 0.5, 0);
       fenceRect(-6.5, 6.5, -5.5, 5.5, 0, 3);
+      put(makeOutdoor('tree'), -5.8, 0, 3, 0, 0);
+      put(makeOutdoor('tree'), 5.8, 0, -3, 0, 0);
+      put(makeOutdoor('flowerbed'), -5.8, 0, 0, 0, 0);
+      put(makeOutdoor('flowerbed'), 5.8, 0, 0, 0, 0);
+      put(makeOutdoor('grill'), -3, 0, 4.8, 0, 0);
+      put(makeOutdoor('garden-set'), 3, 0, 4.8, 0, 0);
     } else if (type === 'traditional') {
       wall(8, 0, -3, 0); wall(8, 0, 3, 0); wall(6, -4, 0, Math.PI / 2); wall(6, 4, 0, Math.PI / 2);
       win(1.4, 1.2, -2, 2.1, -3.15, 0); win(1.4, 1.2, 2, 2.1, -3.15, 0);
@@ -1059,6 +1065,10 @@
       furn('sofa', -2.2, -2, 0); furn('table', 1.8, -2, 0); furn('chair', 1.2, -1.2, 0); furn('chair', 2.4, -1.2, 0);
       furn('bed', 2.6, 2, Math.PI / 2); furn('shelf', -3.2, 2.2, Math.PI / 2); furn('lamp', -0.5, 0.5, 0);
       fenceRect(-5.5, 5.5, -4.5, 4.5, 0, 3);
+      put(makeOutdoor('tree'), -4.7, 0, 2, 0, 0);
+      put(makeOutdoor('tree'), 4.7, 0, -2, 0, 0);
+      put(makeOutdoor('flowerbed'), -4.7, 0, -1, 0, 0);
+      put(makeOutdoor('flowerbed'), 4.7, 0, 1, 0, 0);
     } else if (type === 'villa') {
       wall(12, 0, -4, 0); wall(12, 0, 4, 0); wall(8, -6, 0, Math.PI / 2); wall(8, 6, 0, Math.PI / 2);
       win(2, 1.3, -4, 1.7, -4.15, 0); win(2, 1.3, 4, 1.7, -4.15, 0);
@@ -1087,6 +1097,10 @@
       furn('bed', -1.8, -1.3, 0); furn('sofa', 1.5, -1.5, 0); furn('table', 1.5, 1.2, 0); furn('chair', 1.5, 1.8, 0);
       furn('lamp', -2.2, 1.4, 0); furn('rug', 0, 0, 0);
       fenceRect(-4.5, 4.5, -4, 4, 0, 3);
+      put(makeOutdoor('tree'), -3.7, 0, 1.5, 0, 0);
+      put(makeOutdoor('tree'), 3.7, 0, -1.5, 0, 0);
+      put(makeOutdoor('flowerbed'), -3.7, 0, -0.5, 0, 0);
+      put(makeOutdoor('flowerbed'), 3.7, 0, 0.5, 0, 0);
     }
 
     parts.forEach(function (p) { scene.add(p); allParts.push(p); });

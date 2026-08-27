@@ -56,4 +56,17 @@
     });
   }
   bindAccordion('.faq-wrap');
+
+  /* Clickable explanation cards (innovation center) */
+  document.querySelectorAll('.space-card, .hub-item').forEach(function (card) {
+    card.addEventListener('click', function () {
+      var more = card.querySelector('.card-more');
+      if (!more) return;
+      var open = card.classList.toggle('open');
+      more.style.maxHeight = open ? more.scrollHeight + 'px' : '0px';
+    });
+    card.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.click(); }
+    });
+  });
 })();

@@ -7,23 +7,24 @@
 /* ---------- Page hero banner ---------- */
 .page-hero {
   position: relative;
-  min-height: 56vh;
+  min-height: 62vh;
   display: flex;
   align-items: flex-end;
   padding: 150px 0 70px;
   overflow: hidden;
-  background: linear-gradient(120deg, #2b3319, #44522a 55%, #6b8e23);
+  background: #2b3319;
 }
 .page-hero .page-hero-bg {
   position: absolute; inset: 0;
   background-size: cover; background-position: center;
-  opacity: 0.9;
+  opacity: 1;
 }
 .page-hero::after {
   content: ''; position: absolute; inset: 0;
-  background: linear-gradient(90deg, rgba(27,33,14,0.72) 0%, rgba(27,33,14,0.35) 55%, rgba(27,33,14,0.08) 100%);
+  background: linear-gradient(180deg, rgba(27,33,14,0.02) 35%, rgba(27,33,14,0.5) 78%, rgba(27,33,14,0.82) 100%);
 }
 .page-hero .container { position: relative; z-index: 2; color: #fff; }
+.page-hero h1, .page-hero p, .page-hero-kicker { text-shadow: 0 2px 18px rgba(0,0,0,0.55); }
 .page-hero-kicker {
   text-transform: uppercase; letter-spacing: 5px; font-size: 0.8rem;
   color: var(--olive-lighter); margin-bottom: 14px; font-weight: 600;

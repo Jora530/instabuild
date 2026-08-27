@@ -4,27 +4,27 @@
 
 [id] { scroll-margin-top: 92px; }
 
-/* ---------- Page hero banner ---------- */
+/* ---------- Page hero banner (tekst majtas + foto djathtas) ---------- */
 .page-hero {
   position: relative;
-  min-height: 62vh;
-  display: flex;
-  align-items: flex-end;
   padding: 150px 0 70px;
-  overflow: hidden;
-  background: #2b3319;
+  background: linear-gradient(135deg, #2b3319, #44522a 60%, #6b8e23);
+  color: #fff;
 }
-.page-hero .page-hero-bg {
-  position: absolute; inset: 0;
-  background-size: cover; background-position: center;
-  opacity: 1;
+.page-hero-inner {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 48px;
+  align-items: center;
 }
-.page-hero::after {
-  content: ''; position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(27,33,14,0.02) 35%, rgba(27,33,14,0.5) 78%, rgba(27,33,14,0.82) 100%);
+.page-hero-text { position: relative; z-index: 2; }
+.page-hero-media { position: relative; z-index: 2; }
+.page-hero-media img {
+  width: 100%;
+  border-radius: 20px;
+  box-shadow: 0 30px 70px rgba(0,0,0,0.4);
+  display: block;
 }
-.page-hero .container { position: relative; z-index: 2; color: #fff; }
-.page-hero h1, .page-hero p, .page-hero-kicker { text-shadow: 0 2px 18px rgba(0,0,0,0.55); }
 .page-hero-kicker {
   text-transform: uppercase; letter-spacing: 5px; font-size: 0.8rem;
   color: var(--olive-lighter); margin-bottom: 14px; font-weight: 600;
@@ -34,6 +34,10 @@
   font-weight: 600; line-height: 1.05; max-width: 820px;
 }
 .page-hero p { max-width: 640px; color: rgba(255,255,255,0.9); margin-top: 16px; font-size: 1.05rem; }
+@media (max-width: 860px) {
+  .page-hero-inner { grid-template-columns: 1fr; }
+  .page-hero-media img { max-height: 420px; object-fit: cover; }
+}
 
 /* ---------- Stats band ---------- */
 .stats-row { display: flex; gap: 48px; flex-wrap: wrap; margin-top: 44px; }

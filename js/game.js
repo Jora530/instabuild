@@ -1,19 +1,19 @@
 /* ============================================================
-   InstaBuild 3D — "Ndërto Shtëpinë Tënde"
-   Stili "Hometopia": vendosje e LIRË pa rrjetë, rrotullim 360°,
-   themele + kate shumëkatëshe, rrotë ngjyrash + tekstura materialesh,
-   mobilie të bollshme, pamje 3D/2D, ecje brenda, ruaj/ngarko dhe Co-op.
+   InstaBuild 3D — "Build Your House"
+   Style "Hometopia": FREE placement without grid, 360° rotation,
+   foundations + multistory floors, color wheel + material textures,
+   abundant furniture, 3D/2D view, walking inside, save/load and Co-op.
    ============================================================ */
 (function () {
   'use strict';
 
   var SAVE_KEY = 'instabuild_game_v2';
-  var FLOOR_H = 3.0;      // lartësia e një kati
-  var WALL_H = 2.7;       // lartësia standarde e murit
-  var SNAP_STEP = 0.5;    // hapi i snap-it (kur aktivizohet)
+  var FLOOR_H = 3.0;      // height of one floor
+  var WALL_H = 2.7;       // standard wall height
+  var SNAP_STEP = 0.5;    // snap step (when enabled)
 
   var state = { env: 'plot', currentFloor: 0, floorCount: 1 };
-  var allParts = [];      // të gjitha pjesët e vendosura (mure, pllaka, mobilie, etj.)
+  var allParts = [];      // all placed parts (walls, slabs, furniture, etc.)
   var undoStack = [];
   var redoStack = [];
 
@@ -100,7 +100,7 @@
   function hexColor(hex) { return parseInt(hex.replace('#', ''), 16); }
 
   /* ============================================================
-     NDRICIMI DITË / NATË (si në Home Design 3D)
+     DAY / NIGHT LIGHTING (like Home Design 3D)
      ============================================================ */
   var DAY_STATES = [
     { h: 5, elev: -12, azim: 55, sun: 0x3a4a6a, sunI: 0.0, sky: 0x26324e, hSky: 0x35456a, hGround: 0x0d1520, hI: 0.35 },
@@ -115,10 +115,10 @@
     return new THREE.Color(lerp(a.r, b.r, t), lerp(a.g, b.g, t), lerp(a.b, b.b, t));
   }
   function hourLabel(hour) {
-    if (hour < 6 || hour > 19) return '🌙 Natë';
-    if (hour < 10) return '🌅 Mëngjes';
-    if (hour < 16) return '☀️ Mesditë';
-    return '🌇 Perëndim';
+    if (hour < 6 || hour > 19) return '🌙 Night';
+    if (hour < 10) return '🌅 Morning';
+    if (hour < 16) return '☀️ Midday';
+    return '🌇 Sunset';
   }
   function setTimeOfDay(v) {
     if (!sun || !hemi || !scene) return;
@@ -163,10 +163,10 @@
     if (label === lastSkyLabel || !skyDome) return;
     lastSkyLabel = label;
     var sky = {
-      '🌙 Natë': [0x0a1020, 0x1c2740],
-      '🌅 Mëngjes': [0x5f9ad0, 0xdcebf5],
-      '☀️ Mesditë': [0x3f8fd0, 0xcfe6f5],
-      '🌇 Perëndim': [0x5a6ab0, 0xf5c08a]
+      '🌙 Night': [0x0a1020, 0x1c2740],
+      '🌅 Morning': [0x5f9ad0, 0xdcebf5],
+      '☀️ Midday': [0x3f8fd0, 0xcfe6f5],
+      '🌇 Sunset': [0x5a6ab0, 0xf5c08a]
     }[label] || [0x3f8fd0, 0xcfe6f5];
     if (skyDome.material.map) skyDome.material.map.dispose();
     skyDome.material.map = makeSkyTexture(sky[0], sky[1]);
@@ -174,7 +174,7 @@
   }
 
   /* ============================================================
-     NGJYRAT + TEKSTURAT E MATERIALEVE
+     COLORS + MATERIAL TEXTURES
      ============================================================ */
   var selectedColor = '#f2efe6';
   var selectedMaterial = 'plaster'; // 'plaster' | 'wood' | 'brick' | 'stone' | 'tile' | 'concrete' | 'metal' | 'glass' | 'smooth'
@@ -230,7 +230,7 @@
     }
     if (name === 'brick') {
       return makeTex('brick', function (ctx, S) {
-        ctx.fillStyle = '#e8e8e8'; ctx.fillRect(0, 0, S, S); // llaç
+        ctx.fillStyle = '#e8e8e8'; ctx.fillRect(0, 0, S, S); // mortar
         var bw = 40, bh = 20;
         for (var y = 0; y < S; y += bh) {
           var off = (Math.floor(y / bh) % 2) * (bw / 2);
@@ -311,7 +311,7 @@
   }
 
   /* ============================================================
-     PEIZAZHI I MJEDISIT
+     ENVIRONMENT LANDSCAPE
      ============================================================ */
   var people = [], cars = [], clouds = [];
 
@@ -520,15 +520,15 @@
   function buildEnvironment() {
     clearAllObjects();
     var i, rnd = seededRandom(7);
-    // Lëndinë e pastër
+    // Clean lawn
     createGround(0x79a05a, 0, grassTexture('#79a05a'));
-    // Trualli i ndërtimit (pak më i hapur)
+    // Building plot (a bit more open)
     var plot = new THREE.Mesh(new THREE.PlaneGeometry(26, 26), new THREE.MeshLambertMaterial({ color: 0x8fae6a }));
     plot.rotation.x = -Math.PI / 2;
     plot.position.set(0, 0.02, 0);
     plot.receiveShadow = true;
     scene.add(plot);
-    // Kufiri i truallit
+    // Plot boundary
     var borderMat = new THREE.MeshLambertMaterial({ color: 0xc9b896 });
     function border(x, z, w, d) {
       var s = new THREE.Mesh(new THREE.BoxGeometry(w, 0.14, d), borderMat);
@@ -540,7 +540,7 @@
     border(0, 13.2, 26.6, 0.5);
     border(-13.2, 0, 0.5, 26.6);
     border(13.2, 0, 0.5, 26.6);
-    // Dekor i lehtë rreth e rrotull (pemë, lule, gurë)
+    // Light decor all around (trees, flowers, rocks)
     for (i = 0; i < 14; i++) {
       var a = (i / 14) * Math.PI * 2;
       var d = 28 + rnd() * 18;
@@ -615,7 +615,7 @@
   }
 
   /* ============================================================
-     KRIJIMI I PJESËVE (mure, pllaka, kulme, dritare, dyer...)
+     CREATING PARTS (walls, slabs, roofs, windows, doors...)
      ============================================================ */
   function makeWallMesh(w, h, d, colorHex, matId) {
     var m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), makePartMaterial(colorHex, matId));
@@ -711,7 +711,7 @@
   }
 
   /* ============================================================
-     MOBILIE (katalog i gjerë)
+     FURNITURE (wide catalog)
      ============================================================ */
   function makeFurniture(type) {
     var g = new THREE.Group();
@@ -989,10 +989,10 @@
      SHTËPITË E GATSHME
      ============================================================ */
   var HOUSES = [
-    { id: 'modern', ico: '🏠', label: 'Shtëpi Moderne' },
-    { id: 'traditional', ico: '🏡', label: 'Shtëpi Tradicionale' },
-    { id: 'villa', ico: '🏰', label: 'Vilë (2 kate)' },
-    { id: 'cottage', ico: '🛖', label: 'Shtëpi Fshati' }
+    { id: 'modern', ico: '🏠', label: 'Modern House' },
+    { id: 'traditional', ico: '🏡', label: 'Traditional House' },
+    { id: 'villa', ico: '🏰', label: 'Villa (2 floors)' },
+    { id: 'cottage', ico: '🛖', label: 'Cottage' }
   ];
 
   function buildReadyHouse(type) {
@@ -1033,9 +1033,9 @@
         }
       }
       side(x0, z0, x1, z0, 0, 0);          // mbrapa
-      side(x0, z1, x1, z1, gapX, gapW);    // para (hapësirë për derën)
-      side(x1, z0, x1, z1, 0, 0);          // djathtas
-      side(x0, z1, x0, z0, 0, 0);          // majtas
+      side(x0, z1, x1, z1, gapX, gapW);    // front (gap for the door)
+      side(x1, z0, x1, z1, 0, 0);          // right
+      side(x0, z1, x0, z0, 0, 0);          // left
     }
 
     if (type === 'modern') {
@@ -1113,77 +1113,77 @@
     enter3D();
     resetCamera();
     guideNotify('wall');
-    toast('🏠 Shtëpia u ndërtua — tani mund ta redaktosh ose të futesh brenda!');
+    toast('🏠 House built — now you can edit it or go inside!');
   }
 
   /* ============================================================
-     MJETET / TOOLS
+     TOOLS
      ============================================================ */
   var TOOLS = {
     build: [
-      { id: 'wall', ico: '🧱', label: 'Mur', kind: 'wall' },
-      { id: 'window', ico: '🪟', label: 'Dritare', kind: 'window', make: function () { return makeWindow(1.1, 1.0); } },
-      { id: 'window-big', ico: '🪟', label: 'Dritare e madhe', kind: 'window', make: function () { return makeWindow(1.8, 1.3); } },
-      { id: 'door', ico: '🚪', label: 'Derë', kind: 'door', make: function () { return makeDoor(1.0, 2.1, '#6b4a2b'); } },
-      { id: 'roof-gable', ico: '🔺', label: 'Kulm trekëndësh', kind: 'place', yOff: WALL_H, make: function () { return makeGableRoof(4.6, 3, 1.8, selectedColor, selectedMaterial); } },
-      { id: 'roof-pyramid', ico: '⛺', label: 'Kulm piramidë', kind: 'place', yOff: WALL_H, make: function () { return makePyramidRoof(3.4, 3.4, 1.6, selectedColor, selectedMaterial); } },
-      { id: 'roof-flat', ico: '▬', label: 'Kulm i sheshtë', kind: 'place', yOff: WALL_H, make: function () { return makeFlatRoof(4.6, 3.4, selectedColor, selectedMaterial); } },
-      { id: 'chimney', ico: '🏭', label: 'Oxhak', kind: 'place', yOff: WALL_H, make: function () { return makeChimney(selectedColor, selectedMaterial); } }
+      { id: 'wall', ico: '🧱', label: 'Wall', kind: 'wall' },
+      { id: 'window', ico: '🪟', label: 'Window', kind: 'window', make: function () { return makeWindow(1.1, 1.0); } },
+      { id: 'window-big', ico: '🪟', label: 'Large window', kind: 'window', make: function () { return makeWindow(1.8, 1.3); } },
+      { id: 'door', ico: '🚪', label: 'Door', kind: 'door', make: function () { return makeDoor(1.0, 2.1, '#6b4a2b'); } },
+      { id: 'roof-gable', ico: '🔺', label: 'Gable roof', kind: 'place', yOff: WALL_H, make: function () { return makeGableRoof(4.6, 3, 1.8, selectedColor, selectedMaterial); } },
+      { id: 'roof-pyramid', ico: '⛺', label: 'Pyramid roof', kind: 'place', yOff: WALL_H, make: function () { return makePyramidRoof(3.4, 3.4, 1.6, selectedColor, selectedMaterial); } },
+      { id: 'roof-flat', ico: '▬', label: 'Flat roof', kind: 'place', yOff: WALL_H, make: function () { return makeFlatRoof(4.6, 3.4, selectedColor, selectedMaterial); } },
+      { id: 'chimney', ico: '🏭', label: 'Chimney', kind: 'place', yOff: WALL_H, make: function () { return makeChimney(selectedColor, selectedMaterial); } }
     ],
     furniture: [
-      { id: 'bed', ico: '🛏️', label: 'Krevat', kind: 'place', make: function () { return makeFurniture('bed'); } },
-      { id: 'sofa', ico: '🛋️', label: 'Divan', kind: 'place', make: function () { return makeFurniture('sofa'); } },
-      { id: 'armchair', ico: '🪑', label: 'Fotele', kind: 'place', make: function () { return makeFurniture('armchair'); } },
-      { id: 'table', ico: '🍽️', label: 'Tavolinë', kind: 'place', make: function () { return makeFurniture('table'); } },
-      { id: 'coffee-table', ico: '☕', label: 'Tavolinë kafeje', kind: 'place', make: function () { return makeFurniture('coffee-table'); } },
-      { id: 'chair', ico: '💺', label: 'Karrige', kind: 'place', make: function () { return makeFurniture('chair'); } },
-      { id: 'desk', ico: '🖥️', label: 'Tavolinë pune', kind: 'place', make: function () { return makeFurniture('desk'); } },
-      { id: 'wardrobe', ico: '🚪', label: 'Garderobë', kind: 'place', make: function () { return makeFurniture('wardrobe'); } },
-      { id: 'shelf', ico: '📚', label: 'Raft', kind: 'place', make: function () { return makeFurniture('shelf'); } },
-      { id: 'bookcase', ico: '📖', label: 'Bibliotekë', kind: 'place', make: function () { return makeFurniture('bookcase'); } },
+      { id: 'bed', ico: '🛏️', label: 'Bed', kind: 'place', make: function () { return makeFurniture('bed'); } },
+      { id: 'sofa', ico: '🛋️', label: 'Sofa', kind: 'place', make: function () { return makeFurniture('sofa'); } },
+      { id: 'armchair', ico: '🪑', label: 'Armchair', kind: 'place', make: function () { return makeFurniture('armchair'); } },
+      { id: 'table', ico: '🍽️', label: 'Table', kind: 'place', make: function () { return makeFurniture('table'); } },
+      { id: 'coffee-table', ico: '☕', label: 'Coffee table', kind: 'place', make: function () { return makeFurniture('coffee-table'); } },
+      { id: 'chair', ico: '💺', label: 'Chair', kind: 'place', make: function () { return makeFurniture('chair'); } },
+      { id: 'desk', ico: '🖥️', label: 'Desk', kind: 'place', make: function () { return makeFurniture('desk'); } },
+      { id: 'wardrobe', ico: '🚪', label: 'Wardrobe', kind: 'place', make: function () { return makeFurniture('wardrobe'); } },
+      { id: 'shelf', ico: '📚', label: 'Shelf', kind: 'place', make: function () { return makeFurniture('shelf'); } },
+      { id: 'bookcase', ico: '📖', label: 'Bookshelf', kind: 'place', make: function () { return makeFurniture('bookcase'); } },
       { id: 'tv', ico: '📺', label: 'TV', kind: 'place', make: function () { return makeFurniture('tv'); } },
-      { id: 'tv-stand', ico: '🗄️', label: 'Komodinë TV', kind: 'place', make: function () { return makeFurniture('tv-stand'); } },
-      { id: 'lamp', ico: '💡', label: 'Llambë', kind: 'place', make: function () { return makeFurniture('lamp'); } },
-      { id: 'floor-lamp', ico: '🛋️', label: 'Llambë dysh.', kind: 'place', make: function () { return makeFurniture('floor-lamp'); } },
-      { id: 'kitchen-counter', ico: '🔪', label: 'Banak', kind: 'place', make: function () { return makeFurniture('kitchen-counter'); } },
-      { id: 'stove', ico: '🍳', label: 'Sobë', kind: 'place', make: function () { return makeFurniture('stove'); } },
-      { id: 'fridge', ico: '🧊', label: 'Frigorifer', kind: 'place', make: function () { return makeFurniture('fridge'); } },
-      { id: 'sink', ico: '🚰', label: 'Lavaman', kind: 'place', make: function () { return makeFurniture('sink'); } },
-      { id: 'toilet', ico: '🚽', label: 'Tualet', kind: 'place', make: function () { return makeFurniture('toilet'); } },
-      { id: 'bathtub', ico: '🛁', label: 'Vaskë', kind: 'place', make: function () { return makeFurniture('bathtub'); } },
-      { id: 'shower', ico: '🚿', label: 'Dush', kind: 'place', make: function () { return makeFurniture('shower'); } },
-      { id: 'rug', ico: '🧶', label: 'Qilim', kind: 'place', make: function () { return makeFurniture('rug'); } },
-      { id: 'plant', ico: '🪴', label: 'Bimë', kind: 'place', make: function () { return makeFurniture('plant'); } },
-      { id: 'mirror', ico: '🪞', label: 'Pasqyrë', kind: 'place', make: function () { return makeFurniture('mirror'); } },
-      { id: 'oven', ico: '🍕', label: 'Furrë', kind: 'place', make: function () { return makeFurniture('oven'); } },
-      { id: 'dishwasher', ico: '🍽️', label: 'Lavastovilje', kind: 'place', make: function () { return makeFurniture('dishwasher'); } },
-      { id: 'washing-machine', ico: '🧺', label: 'Lavatriçe', kind: 'place', make: function () { return makeFurniture('washing-machine'); } },
+      { id: 'tv-stand', ico: '🗄️', label: 'TV stand', kind: 'place', make: function () { return makeFurniture('tv-stand'); } },
+      { id: 'lamp', ico: '💡', label: 'Lamp', kind: 'place', make: function () { return makeFurniture('lamp'); } },
+      { id: 'floor-lamp', ico: '🛋️', label: 'Floor lamp', kind: 'place', make: function () { return makeFurniture('floor-lamp'); } },
+      { id: 'kitchen-counter', ico: '🔪', label: 'Kitchen counter', kind: 'place', make: function () { return makeFurniture('kitchen-counter'); } },
+      { id: 'stove', ico: '🍳', label: 'Stove', kind: 'place', make: function () { return makeFurniture('stove'); } },
+      { id: 'fridge', ico: '🧊', label: 'Fridge', kind: 'place', make: function () { return makeFurniture('fridge'); } },
+      { id: 'sink', ico: '🚰', label: 'Sink', kind: 'place', make: function () { return makeFurniture('sink'); } },
+      { id: 'toilet', ico: '🚽', label: 'Toilet', kind: 'place', make: function () { return makeFurniture('toilet'); } },
+      { id: 'bathtub', ico: '🛁', label: 'Bathtub', kind: 'place', make: function () { return makeFurniture('bathtub'); } },
+      { id: 'shower', ico: '🚿', label: 'Shower', kind: 'place', make: function () { return makeFurniture('shower'); } },
+      { id: 'rug', ico: '🧶', label: 'Rug', kind: 'place', make: function () { return makeFurniture('rug'); } },
+      { id: 'plant', ico: '🪴', label: 'Plant', kind: 'place', make: function () { return makeFurniture('plant'); } },
+      { id: 'mirror', ico: '🪞', label: 'Mirror', kind: 'place', make: function () { return makeFurniture('mirror'); } },
+      { id: 'oven', ico: '🍕', label: 'Oven', kind: 'place', make: function () { return makeFurniture('oven'); } },
+      { id: 'dishwasher', ico: '🍽️', label: 'Dishwasher', kind: 'place', make: function () { return makeFurniture('dishwasher'); } },
+      { id: 'washing-machine', ico: '🧺', label: 'Washing machine', kind: 'place', make: function () { return makeFurniture('washing-machine'); } },
       { id: 'piano', ico: '🎹', label: 'Piano', kind: 'place', make: function () { return makeFurniture('piano'); } },
-      { id: 'desk-chair', ico: '🪑', label: 'Karrige zyre', kind: 'place', make: function () { return makeFurniture('desk-chair'); } },
-      { id: 'vase', ico: '🏺', label: 'Vazo', kind: 'place', make: function () { return makeFurniture('vase'); } },
-      { id: 'curtains', ico: '🪟', label: 'Perde', kind: 'place', make: function () { return makeFurniture('curtains'); } }
+      { id: 'desk-chair', ico: '🪑', label: 'Desk chair', kind: 'place', make: function () { return makeFurniture('desk-chair'); } },
+      { id: 'vase', ico: '🏺', label: 'Vase', kind: 'place', make: function () { return makeFurniture('vase'); } },
+      { id: 'curtains', ico: '🪟', label: 'Curtains', kind: 'place', make: function () { return makeFurniture('curtains'); } }
     ],
     struct: [
-      { id: 'foundation', ico: '🟫', label: 'Themel', kind: 'foundation' },
-      { id: 'slab', ico: '◼️', label: 'Pllakë kati', kind: 'slab' },
-      { id: 'stairs', ico: '🪜', label: 'Shkallë', kind: 'place', yOff: 0, make: function () { return makeStairs(selectedColor, selectedMaterial); } }
+      { id: 'foundation', ico: '🟫', label: 'Foundation', kind: 'foundation' },
+      { id: 'slab', ico: '◼️', label: 'Floor slab', kind: 'slab' },
+      { id: 'stairs', ico: '🪜', label: 'Stairs', kind: 'place', yOff: 0, make: function () { return makeStairs(selectedColor, selectedMaterial); } }
     ],
     outdoor: [
-      { id: 'tree', ico: '🌳', label: 'Pemë', kind: 'place', make: function () { return makeOutdoor('tree'); } },
-      { id: 'flowerbed', ico: '🌷', label: 'Shtrat lulesh', kind: 'place', make: function () { return makeOutdoor('flowerbed'); } },
-      { id: 'fence', ico: '🚧', label: 'Gardh', kind: 'place', make: function () { return makeOutdoor('fence'); } },
-      { id: 'hedge', ico: '🌿', label: 'Gjerdh i gjelbër', kind: 'place', make: function () { return makeOutdoor('hedge'); } },
-      { id: 'pool', ico: '🏊', label: 'Pishinë', kind: 'place', make: function () { return makeOutdoor('pool'); } },
-      { id: 'grill', ico: '🍖', label: 'Barbekju', kind: 'place', make: function () { return makeOutdoor('grill'); } },
-      { id: 'garden-set', ico: '🪑', label: 'Set kopshti', kind: 'place', make: function () { return makeOutdoor('garden-set'); } },
-      { id: 'garden-lamp', ico: '💡', label: 'Llambë kopshti', kind: 'place', make: function () { return makeOutdoor('garden-lamp'); } },
-      { id: 'mailbox', ico: '📮', label: 'Kuti postare', kind: 'place', make: function () { return makeOutdoor('mailbox'); } }
+      { id: 'tree', ico: '🌳', label: 'Tree', kind: 'place', make: function () { return makeOutdoor('tree'); } },
+      { id: 'flowerbed', ico: '🌷', label: 'Flower bed', kind: 'place', make: function () { return makeOutdoor('flowerbed'); } },
+      { id: 'fence', ico: '🚧', label: 'Fence', kind: 'place', make: function () { return makeOutdoor('fence'); } },
+      { id: 'hedge', ico: '🌿', label: 'Green hedge', kind: 'place', make: function () { return makeOutdoor('hedge'); } },
+      { id: 'pool', ico: '🏊', label: 'Pool', kind: 'place', make: function () { return makeOutdoor('pool'); } },
+      { id: 'grill', ico: '🍖', label: 'Barbecue', kind: 'place', make: function () { return makeOutdoor('grill'); } },
+      { id: 'garden-set', ico: '🪑', label: 'Garden set', kind: 'place', make: function () { return makeOutdoor('garden-set'); } },
+      { id: 'garden-lamp', ico: '💡', label: 'Garden lamp', kind: 'place', make: function () { return makeOutdoor('garden-lamp'); } },
+      { id: 'mailbox', ico: '📮', label: 'Mailbox', kind: 'place', make: function () { return makeOutdoor('mailbox'); } }
     ]
   };
 
   var activeTab = 'house';
-  var currentTool = null;     // tool object OR null (pamje)
-  var editMode = false;       // true kur një mjet/veprim është aktiv
+  var currentTool = null;     // tool object OR null (view)
+  var editMode = false;       // true when a tool/action is active
   var modeAction = null;      // 'build' | 'paint' | 'move' | 'delete' | null
   var placeRot = 0;
   var snapOn = false;
@@ -1191,10 +1191,10 @@
 
   var ghost = null;
   var wallDraw = null;
-  var rectDraw = null;        // për themel/pllakë (drag-drejtkëndësh)
+  var rectDraw = null;        // for foundation/slab (drag rectangle)
   var selectedPart = null;
   var selectionBox = null;
-  var moveStart = null;       // { pos, ry } origjinale për undo
+  var moveStart = null;       // original { pos, ry } for undo
   var resizeTarget = null;
   var resizeStartW = 0, resizeStartH = 0;
 
@@ -1265,18 +1265,18 @@
     redoStack.length = 0;
   }
   function undoLast() {
-    if (!undoStack.length) { toast('⚠️ Asgjë për të zhbërë'); return; }
+    if (!undoStack.length) { toast('⚠️ Nothing to undo'); return; }
     var a = undoStack.pop();
     a.undo();
     redoStack.push(a);
-    toast('↩️ U zhbë');
+    toast('↩️ Undone');
   }
   function redoLast() {
-    if (!redoStack.length) { toast('⚠️ Asgjë për të ribërë'); return; }
+    if (!redoStack.length) { toast('⚠️ Nothing to redo'); return; }
     var a = redoStack.pop();
     a.redo();
     undoStack.push(a);
-    toast('↪️ U ribë');
+    toast('↪️ Redone');
   }
 
   /* ---------- ghost preview ---------- */
@@ -1378,11 +1378,11 @@
   }
 
   /* ============================================================
-     INTERAKSIONI ME KANVAS
+     CANVAS INTERACTION
      ============================================================ */
   function onCanvasDown(e) {
     if (insideActive) return;
-    if (e.button !== 0) return; // majtas = veprim; djathtas = rrotullim
+    if (e.button !== 0) return; // left = action; right = rotate
     setRay(e);
     if (!currentTool && !modeAction) return;
 
@@ -1392,7 +1392,7 @@
         var obj = partsD[i];
         removePart(obj);
         pushUndo(function (o) { return function () { addPart(o, true); }; }(obj), function (o) { return function () { removePart(o, true); }; }(obj));
-        toast('🗑️ U fshi');
+        toast('🗑️ Deleted');
         return;
       }
       return;
@@ -1451,7 +1451,7 @@
           return;
         }
       }
-      toast('⚠️ Kliko MBI një mur që ke ndërtuar');
+      toast('⚠️ Click ON a wall you have built');
     } else if (tool.kind === 'place') {
       var p3 = pointOnFloor(e);
       if (!p3) return;
@@ -1461,7 +1461,7 @@
       part.rotation.y = placeRot;
       addPart(part);
       pushUndo(function (o) { return function () { removePart(o, true); }; }(part), function (o) { return function () { addPart(o, true); }; }(part));
-      toast('✅ U vendos: ' + tool.label);
+      toast('✅ Placed: ' + tool.label);
     }
   }
 
@@ -1566,7 +1566,7 @@
         wall.rotation.y = Math.atan2(dz, dx);
         addPart(wall);
         pushUndo(function (o) { return function () { removePart(o, true); }; }(wall), function (o) { return function () { addPart(o, true); }; }(wall));
-        toast('🧱 Muri: ' + len.toFixed(1) + ' m');
+        toast('🧱 Wall: ' + len.toFixed(1) + ' m');
       }
       if (wallDraw.preview) { scene.remove(wallDraw.preview); disposeObj(wallDraw.preview); }
       wallDraw = null;
@@ -1580,7 +1580,7 @@
         slab.position.set((rectDraw.start.x + end2.x) / 2, baseY() + (tool.kind === 'foundation' ? 0.15 : 0.06), (rectDraw.start.z + end2.z) / 2);
         addPart(slab);
         pushUndo(function (o) { return function () { removePart(o, true); }; }(slab), function (o) { return function () { addPart(o, true); }; }(slab));
-        toast(tool.kind === 'foundation' ? '🟫 U vendos themeli' : '◼️ U vendos pllaka e katit');
+        toast(tool.kind === 'foundation' ? '🟫 Foundation placed' : '◼️ Floor slab placed');
       }
       if (rectDraw.preview) { scene.remove(rectDraw.preview); disposeObj(rectDraw.preview); }
       rectDraw = null;
@@ -1597,7 +1597,7 @@
     var partW = part.userData.w || 1, partH = part.userData.h || 1;
     var margin = partW / 2 + 0.05;
     var localX = Math.max(-w / 2 + margin, Math.min(w / 2 - margin, local.x));
-    var localY = part.userData.kind === 'door' ? partH / 2 : (partH / 2 + 0.75);
+    var localY = (part.userData.kind === 'door' ? partH / 2 : (partH / 2 + 0.75)) - h / 2;
     var localZ = 0;
     if (nz > nx && nz > ny) localZ = d / 2 + 0.03;
     else if (nx > ny) localZ = Math.max(-d / 2 + 0.03, Math.min(d / 2 - 0.03, local.z));
@@ -1607,10 +1607,10 @@
     part.userData.floor = wallMesh.userData.floor;
     addPart(part);
     pushUndo(function (o) { return function () { removePart(o, true); }; }(part), function (o) { return function () { addPart(o, true); }; }(part));
-    toast('✅ U vendos: ' + currentTool.label);
+    toast('✅ Placed: ' + currentTool.label);
   }
 
-  /* ---------- selektimi (për move) ---------- */
+  /* ---------- selection (for move) ---------- */
   function selectPart(obj) {
     deselectPart();
     selectedPart = obj;
@@ -1622,7 +1622,7 @@
     selectedPart = null;
   }
 
-  /* ---------- resize muri (anash + lart) ---------- */
+  /* ---------- wall resize (width + height) ---------- */
   function resizeWall(obj, w, h) {
     var d = obj.userData.d || 0.25;
     var ng = new THREE.BoxGeometry(w, h, d);
@@ -1710,13 +1710,13 @@
     setModeButtons();
     buildToolList();
     if (tool) {
-      if (tool.kind === 'wall') setHint('Kliko e tërhiq për të vizatuar murin');
-      else if (tool.kind === 'window' || tool.kind === 'door') setHint('Kliko MBI një mur për të vendosur');
-      else if (tool.kind === 'foundation') setHint('Kliko e tërhiq për themelin');
-      else if (tool.kind === 'slab') setHint('Kliko e tërhiq për pllakën e katit');
-      else setHint('Kliko në tokë për të vendosur: ' + tool.label);
+      if (tool.kind === 'wall') setHint('Click & drag to draw the wall');
+      else if (tool.kind === 'window' || tool.kind === 'door') setHint('Click ON a wall to place');
+      else if (tool.kind === 'foundation') setHint('Click & drag for the foundation');
+      else if (tool.kind === 'slab') setHint('Click & drag for the floor slab');
+      else setHint('Click on the ground to place: ' + tool.label);
     } else {
-      setHint('Zgjidh një mjet ose përdor mjete transformimi në të djathtë');
+      setHint('Pick a tool or use the transform tools on the right');
     }
     updateEditMode();
   }
@@ -1733,11 +1733,11 @@
     else { modeAction = action; currentTool = null; clearGhost(); cancelDraws(); deselectPart(); if (action !== 'resize') hideResizePanel(); }
     setModeButtons();
     buildToolList();
-    if (modeAction === 'paint') setHint('Kliko një pjesë për ta lyer me ngjyrën/materialin e zgjedhur');
-    else if (modeAction === 'move') setHint('Kliko një pjesë për ta lëvizur · Q/E rrotullim');
-    else if (modeAction === 'delete') setHint('Kliko një pjesë për ta fshirë');
-    else if (modeAction === 'resize') setHint('Kliko një MUR për ta zmadhuar anash e lart');
-    else setHint('Zgjidh një mjet ose përdor mjete transformimi');
+    if (modeAction === 'paint') setHint('Click a part to paint it with the selected color/material');
+    else if (modeAction === 'move') setHint('Click a part to move it · Q/E rotate');
+    else if (modeAction === 'delete') setHint('Click a part to delete it');
+    else if (modeAction === 'resize') setHint('Click a WALL to enlarge it width & height');
+    else setHint('Pick a tool or use the transform tools');
     updateEditMode();
   }
 
@@ -1777,18 +1777,18 @@
         var b = document.createElement('button');
         b.type = 'button';
         b.className = 'floor-btn' + (f === state.currentFloor ? ' active' : '');
-        b.textContent = f === 0 ? 'Përdhes' : 'Kati ' + f;
+        b.textContent = f === 0 ? 'Ground' : 'Floor ' + f;
         b.addEventListener('click', function () { setFloor(f); });
         wrap.appendChild(b);
       })(f);
     }
     var plus = document.createElement('button');
-    plus.type = 'button'; plus.className = 'floor-btn plus'; plus.textContent = '+ Kati';
+    plus.type = 'button'; plus.className = 'floor-btn plus'; plus.textContent = '+ Floor';
     plus.addEventListener('click', addFloor);
     wrap.appendChild(plus);
     if (state.floorCount > 1) {
       var minus = document.createElement('button');
-      minus.type = 'button'; minus.className = 'floor-btn'; minus.textContent = '− Kati';
+      minus.type = 'button'; minus.className = 'floor-btn'; minus.textContent = '− Floor';
       minus.addEventListener('click', removeFloor);
       wrap.appendChild(minus);
     }
@@ -1797,25 +1797,25 @@
     state.currentFloor = f;
     buildFloorBar();
     deselectPart();
-    toast(f === 0 ? '🏠 Katit përdhes' : '🏢 Kati ' + f);
+    toast(f === 0 ? '🏠 Ground floor' : '🏢 Floor ' + f);
   }
   function addFloor() {
     state.floorCount++;
     state.currentFloor = state.floorCount - 1;
     buildFloorBar();
-    toast('➕ U shtua kati ' + (state.floorCount - 1));
+    toast('➕ Floor added: ' + (state.floorCount - 1));
     guideNotify('floor');
   }
   function removeFloor() {
     if (state.floorCount <= 1) return;
     var top = state.floorCount - 1;
     var doomed = allParts.filter(function (p) { return p.userData.floor === top; });
-    if (doomed.length && !confirm('Fshij katin ' + top + ' dhe ' + doomed.length + ' pjesë në të?')) return;
+    if (doomed.length && !confirm('Delete floor ' + top + ' and ' + doomed.length + ' parts on it?')) return;
     doomed.forEach(function (p) { removePart(p, true); });
     state.floorCount--;
     if (state.currentFloor >= state.floorCount) state.currentFloor = state.floorCount - 1;
     buildFloorBar();
-    toast('➖ U hoq kati');
+    toast('➖ Floor removed');
   }
 
   /* ---------- color wheel ---------- */
@@ -1873,15 +1873,15 @@
 
   /* ---------- materials ---------- */
   var MATERIALS = [
-    { id: 'smooth', label: 'Lëmuar' },
-    { id: 'wood', label: 'Dru' },
-    { id: 'brick', label: 'Tullë' },
-    { id: 'stone', label: 'Gur' },
-    { id: 'tile', label: 'Pllakë' },
-    { id: 'plaster', label: 'Suvatim' },
-    { id: 'concrete', label: 'Beton' },
+    { id: 'smooth', label: 'Smooth' },
+    { id: 'wood', label: 'Wood' },
+    { id: 'brick', label: 'Brick' },
+    { id: 'stone', label: 'Stone' },
+    { id: 'tile', label: 'Tile' },
+    { id: 'plaster', label: 'Plaster' },
+    { id: 'concrete', label: 'Concrete' },
     { id: 'metal', label: 'Metal' },
-    { id: 'glass', label: 'Xham' }
+    { id: 'glass', label: 'Glass' }
   ];
   function buildMaterialList() {
     var wrap = document.getElementById('material-list');
@@ -1933,7 +1933,7 @@
     is2D = true;
     if (gridHelper) gridHelper.visible = true;
     document.getElementById('btn-2d').textContent = '🌍 3D';
-    toast('📐 Pamja 2D — planimetria e katit');
+    toast('📐 2D view — floor plan');
   }
   function enter3D() {
     if (savedCam2D) { camera.position.copy(savedCam2D.pos); controls.target.copy(savedCam2D.target); }
@@ -1942,12 +1942,12 @@
     is2D = false;
     if (gridHelper) gridHelper.visible = false;
     document.getElementById('btn-2d').textContent = '📐 2D';
-    toast('🌍 Pamja 3D — shëtit në kohë reale');
+    toast('🌍 3D view — walk in real time');
   }
   function toggle2D() { if (is2D) enter3D(); else enter2D(); }
 
   /* ============================================================
-     SHIKO BRENDA (ecje në vetën e parë)
+     VIEW INSIDE (first-person walking)
      ============================================================ */
   var insideActive = false;
   var wasCameraPos = null, wasTarget = null;
@@ -1997,19 +1997,19 @@
     insideLight.position.set(c.x, floorBase + 2.8, c.z);
     scene.add(insideLight);
     insideActive = true;
-    document.getElementById('btn-inside').textContent = '🏞️ Dil jashtë';
+    document.getElementById('btn-inside').textContent = '🏞️ Go outside';
     document.getElementById('inside-hint').classList.remove('hidden');
     controls.enabled = false;
     document.body.style.cursor = 'crosshair';
     window.addEventListener('mousemove', onInsideLook);
     window.addEventListener('keydown', onInsideKey);
     window.addEventListener('keyup', onInsideKeyUp);
-    toast('🚪 Je brenda! Lëviz me WASD');
+    toast('🚪 You are inside! Move with WASD');
     guideNotify('inside');
   }
   function exitInside() {
     insideActive = false;
-    document.getElementById('btn-inside').textContent = '🚪 Shiko brenda';
+    document.getElementById('btn-inside').textContent = '🚪 View inside';
     document.getElementById('inside-hint').classList.add('hidden');
     if (insideLight) { scene.remove(insideLight); insideLight = null; }
     if (wasCameraPos) camera.position.copy(wasCameraPos);
@@ -2072,7 +2072,7 @@
       camera.position.x += move.x;
       camera.position.z += move.z;
     }
-    // ngjitja/zbritja e shkallëve
+    // going up/down the stairs
     if (onStairs) {
       if (fwd) camera.position.y += 0.09;
       if (back) camera.position.y -= 0.09;
@@ -2089,7 +2089,7 @@
     if (nearestFloor !== state.currentFloor) {
       state.currentFloor = nearestFloor;
       buildFloorBar();
-      toast(nearestFloor === 0 ? '🏠 Katit përdhes' : '🏢 Kati ' + nearestFloor);
+      toast(nearestFloor === 0 ? '🏠 Ground floor' : '🏢 Floor ' + nearestFloor);
     }
   }
 
@@ -2107,10 +2107,10 @@
     };
     try {
       localStorage.setItem(SAVE_KEY, JSON.stringify(data));
-      toast('💾 Loja u ruajt me sukses!');
+      toast('💾 Game saved successfully!');
       guideNotify('save');
     } catch (err) {
-      toast('⚠️ Nuk u ruajt: ' + err.message);
+      toast('⚠️ Save failed: ' + err.message);
     }
   }
   function loadSave() {
@@ -2134,7 +2134,7 @@
   }
 
   /* ============================================================
-     CO-OP (PeerJS) — deri në 4 lojtarë online
+     CO-OP (PeerJS) — up to 4 players online
      ============================================================ */
   var peer = null;
   var peerConnections = [];
@@ -2168,7 +2168,7 @@
   }
   function updatePeerCount() {
     var el = document.getElementById('coop-peers');
-    if (el) el.textContent = 'Lojtarë: ' + (1 + peerConnections.length);
+    if (el) el.textContent = 'Players: ' + (1 + peerConnections.length);
   }
   function broadcast(msg) {
     if (!peerConnections.length) return;
@@ -2199,7 +2199,7 @@
       var t4 = allParts.filter(function (p) { return p.userData.id === msg.id; })[0];
       if (t4 && t4.userData.kind === 'wall') resizeWall(t4, msg.w, msg.h);
     }
-    // hosti i përcjell ndryshimet te lojtarët e tjerë
+    // the host forwards changes to the other players
     if (isHost && peerConnections.length > 1) {
       peerConnections.forEach(function (c) {
         if (c === source) return;
@@ -2208,7 +2208,7 @@
     }
   }
   function hostRoom() {
-    if (typeof Peer === 'undefined') { coopStatus('⚠️ Co-op i padisponueshëm (nuk u ngarkua PeerJS)'); return; }
+    if (typeof Peer === 'undefined') { coopStatus('⚠️ Co-op unavailable (PeerJS not loaded)'); return; }
     try {
       roomCode = genCode();
       peer = new Peer('instabuild-' + roomCode, { debug: 0 });
@@ -2216,22 +2216,22 @@
         isHost = true;
         document.getElementById('coop-room').classList.remove('hidden');
         document.getElementById('coop-code-display').textContent = roomCode;
-        coopStatus('✅ Dhoma u krijua. Shpërndaje kodin me shokët.');
+        coopStatus('✅ Room created. Share the code with your friends.');
       });
       peer.on('connection', setupConn);
       peer.on('error', function (err) {
         var t = (err && err.type) ? err.type : err;
-        if (t === 'unavailable-id') coopStatus('⚠️ Kodi u zu nga një dhomë tjetër — provo prapë');
+        if (t === 'unavailable-id') coopStatus('⚠️ Code taken by another room — try again');
         else coopStatus('⚠️ Gabim: ' + t);
       });
     } catch (e) {
-      coopStatus('⚠️ Nuk u krijua dhoma: ' + e.message);
+      coopStatus('⚠️ Could not create room: ' + e.message);
     }
   }
   function joinRoom() {
-    if (typeof Peer === 'undefined') { coopStatus('⚠️ Co-op i padisponueshëm (nuk u ngarkua PeerJS)'); return; }
+    if (typeof Peer === 'undefined') { coopStatus('⚠️ Co-op unavailable (PeerJS not loaded)'); return; }
     var code = (document.getElementById('coop-code').value || '').trim().toUpperCase();
-    if (!code) { coopStatus('⚠️ Shkruaj kodin e dhomës'); return; }
+    if (!code) { coopStatus('⚠️ Enter the room code'); return; }
     try {
       peer = new Peer({ debug: 0 });
       peer.on('open', function () {
@@ -2242,12 +2242,12 @@
           if (done) return; done = true;
           isHost = false;
           setupConn(conn);
-          coopStatus('✅ U lidhe me dhomën!');
+          coopStatus('✅ Connected to the room!');
         });
         conn.on('error', function () {
-          if (!done) coopStatus('⚠️ Nuk u gjet dhoma me kodin ' + code);
+          if (!done) coopStatus('⚠️ No room found with code ' + code);
         });
-        setTimeout(function () { if (!done && !conn.open) coopStatus('⚠️ Nuk u gjet dhoma me kodin ' + code); }, 8000);
+        setTimeout(function () { if (!done && !conn.open) coopStatus('⚠️ No room found with code ' + code); }, 8000);
       });
       peer.on('error', function (err) {
         coopStatus('⚠️ Gabim: ' + (err && err.type ? err.type : err));
@@ -2258,21 +2258,21 @@
   }
 
   /* ============================================================
-     UDHËRRËFYESI (NPC) — shpjegon lojën hap pas hapi
+     GUIDE (NPC) — explains the game step by step
      ============================================================ */
   var guide = { step: 0, done: {}, visible: false };
   var lastPraiseTime = 0;
-  var PRAISES = ['Good job! 👍', 'Well done! ✨', 'Bravo! 👏', 'Shumë mirë! 🎉', 'Vazhdo kështu! 💪', 'Perfekt! 🌟', 'Të lumtë! 🏆', 'Awesome! 🔥'];
+  var PRAISES = ['Good job! 👍', 'Well done! ✨', 'Bravo! 👏', 'Very good! 🎉', 'Keep it up! 💪', 'Perfect! 🌟', 'Well done! 🏆', 'Awesome! 🔥'];
   var guideSteps = [
-    { id: 'wall', hint: '📐 Hapi 1: Zgjidh një shtëpi të gatshme (tab "Shtëpi") OSE vizato vetë muret (tab "Ndërtim") — kliko e tërhiq.', praise: 'Bravo! 👏 Shtëpia u ndërtua!' },
-    { id: 'window', hint: '🪟 Hapi 2: Vendos një dritare ose derë — kliko MBI murin.', praise: 'Shumë mirë! Well done! ✨' },
-    { id: 'foundation', hint: '🟫 Hapi 3: Në tab "Strukturë" vendos një themel — kliko e tërhiq për madhësinë.', praise: 'Perfekt! 👍 Themeli është gati!' },
-    { id: 'furniture', hint: '🛋️ Hapi 4: Në tab "Mobilie" vendos mobilie (p.sh. krevat ose divan).', praise: 'Good job! Shtëpia po merr jetë! 🏠' },
-    { id: 'rotate', hint: '🔄 Hapi 5: Rrotullo pjesët me Q/E (i hollë) ose R (90°) — vendosje 360°!', praise: 'Bravo! Rrotullim 360° i zotëruar! 🌀' },
-    { id: 'floor', hint: '🏢 Hapi 6: Shto një kat me "+ Kati" për shtëpi shumëkatëshe.', praise: 'WOW! Shumëkatëshe! 🏗️' },
-    { id: 'paint', hint: '🎨 Hapi 7: Lyej një pjesë — kliko "🖌️ Lyej" e pastaj mbi pjesën.', praise: 'Ngjyra të mrekullueshme! 🌈' },
-    { id: 'inside', hint: '🚪 Hapi 8: Shiko shtëpinë nga brenda me "🚪 Shiko brenda" dhe ec me WASD.', praise: 'Good job! E sheh shtëpinë nga brenda! 🚶' },
-    { id: 'save', hint: '💾 Hapi 9: Ruaj lojën me butonin "Ruaj" që të mos e humbasësh.', praise: 'Well done! Loja u ruajt! 💾' }
+    { id: 'wall', hint: '📐 Step 1: Pick a ready-made house (tab "House") OR draw the walls yourself (tab "Build") — click & drag.', praise: 'Bravo! 👏 House built!' },
+    { id: 'window', hint: '🪟 Step 2: Place a window or door — click ON the wall.', praise: 'Very good! Well done! ✨' },
+    { id: 'foundation', hint: '🟫 Step 3: In the "Structure" tab place a foundation — click & drag for the size.', praise: 'Perfect! 👍 Foundation is ready!' },
+    { id: 'furniture', hint: '🛋️ Step 4: In the "Furniture" tab place furniture (e.g. bed or sofa).', praise: 'Good job! The house is coming to life! 🏠' },
+    { id: 'rotate', hint: '🔄 Step 5: Rotate parts with Q/E (fine) or R (90°) — 360° placement!', praise: 'Bravo! 360° rotation mastered! 🌀' },
+    { id: 'floor', hint: '🏢 Step 6: Add a floor with "+ Floor" for multistory houses.', praise: 'WOW! Multistory! 🏗️' },
+    { id: 'paint', hint: '🎨 Step 7: Paint a part — click "🖌️ Paint" and then on the part.', praise: 'Wonderful colors! 🌈' },
+    { id: 'inside', hint: '🚪 Step 8: View the house from inside with "🚪 View inside" and walk with WASD.', praise: 'Good job! You can see the house from inside! 🚶' },
+    { id: 'save', hint: '💾 Step 9: Save the game with the "Save" button so you do not lose it.', praise: 'Well done! Game saved! 💾' }
   ];
 
   function randomPraise() { return PRAISES[Math.floor(Math.random() * PRAISES.length)]; }
@@ -2291,7 +2291,7 @@
     guide.step = 0;
     guide.done = {};
     guide.visible = false;
-    guideSay('👋 Mirë se erdhe në InstaBuild! Unë jam Nino. Zgjidh një shtëpi të gatshme në tab "Shtëpi", ose vizato vetë planimetrinë. Ndiq hapat e mi!', false);
+    guideSay('👋 Welcome to InstaBuild! I am Nino. Pick a ready-made house in the "House" tab, or draw the floor plan yourself. Follow my steps!', false);
     setTimeout(function () {
       if (guide.visible && guide.step < guideSteps.length) guideSay(guideSteps[guide.step].hint, false);
     }, 4500);
@@ -2324,7 +2324,7 @@
       setTimeout(function () {
         if (guide.visible && next === guide.step) {
           if (next < guideSteps.length) guideSay(guideSteps[next].hint, false);
-          else guideSay('🎉 E përfundove mësimin! Tani je gati të ndërtosh çfarë të duash! ' + randomPraise(), true);
+          else guideSay('🎉 You finished the tutorial! Now you are ready to build whatever you like! ' + randomPraise(), true);
         }
       }, 4200);
     } else {
@@ -2353,16 +2353,16 @@
     buildFloorBar();
     setTool(null);
     deselectPart();
-    document.getElementById('hud-loc').textContent = '🌱 Truall i pastër';
+    document.getElementById('hud-loc').textContent = '🌱 Empty plot';
     showScreen();
     resetCamera();
     enter2D();
     initGuide();
-    toast('📐 Vizato planimetrinë në 2D — zgjidh "Mur" dhe vizato muret e shtëpisë.');
+    toast('📐 Draw your floor plan in 2D — pick "Wall" and draw the walls of the house.');
   }
   function continueGame() {
     var loaded = loadSave();
-    if (!loaded) { toast('⚠️ Nuk ka lojë të ruajtur'); return; }
+    if (!loaded) { toast('⚠️ No saved game'); return; }
     undoStack.length = 0;
     redoStack.length = 0;
     buildEnvironment();
@@ -2370,12 +2370,12 @@
     loaded.forEach(function (m) { scene.add(m); });
     buildFloorBar();
     setTool(null);
-    document.getElementById('hud-loc').textContent = '🌱 Truall i pastër';
+    document.getElementById('hud-loc').textContent = '🌱 Empty plot';
     showScreen();
     resetCamera();
     enter2D();
     initGuide();
-    toast('💾 Loja e ruajtur u ngarkua');
+    toast('💾 Saved game loaded');
   }
   function resetCamera() {
     camera.position.set(18, 14, 22);
@@ -2397,7 +2397,7 @@
   bindAction('btn-2d', toggle2D);
   bindAction('btn-inside', function () { if (insideActive) exitInside(); else enterInside(); });
   bindAction('btn-restart', function () {
-    if (!confirm('Fillo nga e para? Loja e tanishme do të humbet.')) return;
+    if (!confirm('Start over? Your current game will be lost.')) return;
     try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
     location.reload();
   });
@@ -2405,7 +2405,7 @@
   bindAction('btn-paint', function () { setModeAction('paint'); });
   bindAction('btn-delete', function () { setModeAction('delete'); });
   bindAction('btn-resize', function () { setModeAction('resize'); });
-  bindAction('btn-snap', function () { snapOn = !snapOn; setModeButtons(); toast(snapOn ? '📏 Snap i aktivizuar' : '📏 Snap i çaktivizuar'); });
+  bindAction('btn-snap', function () { snapOn = !snapOn; setModeButtons(); toast(snapOn ? '📏 Snap enabled' : '📏 Snap disabled'); });
   bindAction('btn-rot-cw', function () { rotateBy(5 * Math.PI / 180); });
   bindAction('btn-rot-ccw', function () { rotateBy(-5 * Math.PI / 180); });
   bindAction('btn-rot-90', function () { rotateBy(Math.PI / 2); });
@@ -2444,7 +2444,7 @@
 
   /* ---------- canvas events (wired after initThree, below) ---------- */
 
-  /* ---------- keys (rrotullim + snap + shkurtore) ---------- */
+  /* ---------- keys (rotate + snap + shortcuts) ---------- */
   document.addEventListener('keydown', function (e) {
     var k = e.key;
     if (k === 'Shift') shiftHeld = true;
@@ -2453,7 +2453,7 @@
     else if (k === 'e' || k === 'E') { rotateBy(5 * Math.PI / 180); }
     else if (k === 'r' || k === 'R') { rotateBy(Math.PI / 2); }
     else if (k === 'Delete' || k === 'Backspace') {
-      if (selectedPart) { removePart(selectedPart); deselectPart(); toast('🗑️ U fshi'); }
+      if (selectedPart) { removePart(selectedPart); deselectPart(); toast('🗑️ Deleted'); }
     } else if (k === 'Escape') {
       setTool(null); setModeAction(null); deselectPart(); cancelDraws();
     } else if (k === 'z' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); undoLast(); }
@@ -2508,7 +2508,7 @@
     try { hasSave = !!localStorage.getItem(SAVE_KEY); } catch (e) {}
     document.getElementById('btn-continue').classList.toggle('hidden', !hasSave);
   } catch (err) {
-    document.body.innerHTML = '<div style="padding:40px;font-family:sans-serif"><h2>⚠️ WebGL nuk u aktivizua</h2><p>' + err.message + '</p><p>Aktivizo përshpejtimin grafik në shfletues dhe provo prapë.</p></div>';
+    document.body.innerHTML = '<div style="padding:40px;font-family:sans-serif"><h2>⚠️ WebGL is not enabled</h2><p>' + err.message + '</p><p>Enable hardware acceleration in your browser and try again.</p></div>';
     console.error(err);
   }
 

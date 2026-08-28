@@ -1,5 +1,5 @@
 /* ============================================================
-   InstaBuild 3D — Ndërto Shtëpinë Tënde (game styles)
+   InstaBuild 3D — Build Your House (game styles)
    ============================================================ */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Inter', 'Segoe UI', sans-serif; }
@@ -205,13 +205,13 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Inter', 
 }
 .toast.show { opacity: 1; }
 
-/* ---------- Side panels (të dyja në të majtë, të stivuara) ---------- */
+/* ---------- Side panels (both on the left, stacked) ---------- */
 .left-stack {
   position: fixed;
-  top: 86px;
+  top: 156px;
   left: 16px;
   width: 250px;
-  max-height: calc(100vh - 120px);
+  max-height: calc(100vh - 176px);
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -226,7 +226,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Inter', 
   flex: 0 0 auto;
   background: rgba(255,255,255,0.97);
   border-radius: 18px;
-  padding: 14px;
+  padding: 10px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.25);
   pointer-events: auto;
   border: 1px solid #dfe6cd;
@@ -234,8 +234,8 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Inter', 
   flex-direction: column;
 }
 .side-panel.right { width: 100%; }
-.panel-title { font-family: 'Cormorant Garamond', serif; font-size: 1.15rem; font-weight: 700; color: #333d1f; text-align: center; margin-bottom: 8px; }
-.panel-hint { text-align: center; font-size: 0.72rem; color: #5a6644; margin-top: 8px; }
+.panel-title { font-family: 'Cormorant Garamond', serif; font-size: 1rem; font-weight: 700; color: #333d1f; text-align: center; margin-bottom: 6px; }
+.panel-hint { text-align: center; font-size: 0.64rem; color: #5a6644; margin-top: 6px; }
 
 .tabs { display: flex; gap: 4px; margin-bottom: 8px; flex-wrap: wrap; }
 .tab {
@@ -244,29 +244,29 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Inter', 
   background: #fafbf6;
   color: #333d1f;
   border-radius: 8px;
-  padding: 6px 4px;
+  padding: 5px 3px;
   font-family: inherit;
   font-weight: 600;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   cursor: pointer;
   transition: all 0.2s;
 }
 .tab.active { background: #556b2f; color: #fff; border-color: #556b2f; }
 
-.tool-list { display: flex; flex-direction: column; gap: 6px; overflow-y: auto; padding-right: 2px; }
+.tool-list { display: flex; flex-direction: column; gap: 4px; overflow-y: auto; padding-right: 2px; }
 .tool-btn {
   border: 2px solid #dfe6cd;
   background: #fafbf6;
   border-radius: 12px;
-  padding: 9px 12px;
+  padding: 7px 10px;
   cursor: pointer;
   font-family: inherit;
-  font-size: 0.85rem;
+  font-size: 0.76rem;
   font-weight: 600;
   color: #333d1f;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   text-align: left;
   width: 100%;
   transition: all 0.2s;
@@ -274,7 +274,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Inter', 
 .tool-btn .pico { font-size: 1.3rem; width: 26px; text-align: center; flex: 0 0 auto; }
 .tool-btn:hover { border-color: #556b2f; background: #eef2e2; }
 .tool-btn.active { border-color: #556b2f; background: #eef2e2; box-shadow: 0 0 0 3px rgba(85,107,47,0.2); }
-.tool-btn.house { padding: 12px 14px; font-size: 0.95rem; }
+.tool-btn.house { padding: 10px 12px; font-size: 0.84rem; }
 .tool-btn.house .pico { font-size: 1.6rem; }
 
 /* ---------- Style panel ---------- */
@@ -285,8 +285,8 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Inter', 
   padding: 10px;
   margin-bottom: 10px;
 }
-.resize-title { font-size: 0.78rem; font-weight: 700; color: #333d1f; text-align: center; margin-bottom: 6px; }
-.resize-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; font-size: 0.72rem; color: #5a6644; }
+.resize-title { font-size: 0.7rem; font-weight: 700; color: #333d1f; text-align: center; margin-bottom: 5px; }
+.resize-row { display: flex; align-items: center; gap: 5px; margin-bottom: 5px; font-size: 0.66rem; color: #5a6644; }
 .resize-row label { width: 34px; font-weight: 600; }
 .resize-row input[type=range] { flex: 1; accent-color: #556b2f; cursor: pointer; }
 .resize-val { width: 44px; text-align: right; font-weight: 700; color: #333d1f; font-variant-numeric: tabular-nums; }
@@ -294,27 +294,27 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Inter', 
 .style-row { display: flex; gap: 12px; }
 .style-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
 #colorwheel { border-radius: 50%; cursor: crosshair; box-shadow: 0 0 0 2px #fff, 0 4px 16px rgba(0,0,0,0.2); width: 150px; height: 150px; }
-.value-row { display: flex; align-items: center; gap: 6px; font-size: 0.7rem; color: #5a6644; width: 100%; }
+.value-row { display: flex; align-items: center; gap: 5px; font-size: 0.64rem; color: #5a6644; width: 100%; }
 .value-row input[type=range] { flex: 1; }
 .swatch-row { display: flex; align-items: center; gap: 8px; }
 .swatch { width: 30px; height: 30px; border-radius: 8px; border: 2px solid #fff; box-shadow: 0 0 0 1px #dfe6cd; }
 .swatch-row input[type=color] { width: 40px; height: 30px; border: none; background: none; cursor: pointer; }
-.style-label { font-size: 0.72rem; font-weight: 700; color: #333d1f; margin-top: 2px; }
+.style-label { font-size: 0.66rem; font-weight: 700; color: #333d1f; margin-top: 2px; }
 .material-list { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 100%; }
 .mat-btn {
   border: 2px solid #dfe6cd;
   background: #fafbf6;
   border-radius: 10px;
-  padding: 6px 4px;
+  padding: 5px 3px;
   cursor: pointer;
   font-family: inherit;
-  font-size: 0.68rem;
+  font-size: 0.6rem;
   font-weight: 600;
   color: #333d1f;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
+  gap: 2px;
   transition: all 0.2s;
 }
 .mat-btn canvas { width: 100%; height: 30px; border-radius: 6px; }
@@ -322,7 +322,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Inter', 
 
 .transform-actions { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-top: 10px; }
 .rot-row { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 8px; }
-.rot-label { font-size: 0.72rem; color: #5a6644; }
+.rot-label { font-size: 0.64rem; color: #5a6644; }
 .undo-row { display: flex; gap: 6px; justify-content: center; margin-top: 8px; }
 
 /* ---------- Inside hint ---------- */
@@ -341,7 +341,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Inter', 
   backdrop-filter: blur(4px);
 }
 
-/* ---------- Guide (Nino) — 2D avatar lart-djathtas ---------- */
+/* ---------- Guide (Nino) — 2D avatar top-right ---------- */
 .guide-2d {
   position: fixed;
   top: 90px;

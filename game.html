@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>InstaBuild — Ndërto Shtëpinë Tënde 3D</title>
+<title>InstaBuild — Build Your House 3D</title>
 <link rel="icon" type="image/png" href="images/instabuilt-thumbnail.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,15 +15,15 @@
 <div id="game-wrap">
   <canvas id="game-canvas"></canvas>
 
-  <!-- ============ EKRANI I FILLIMIT ============ -->
+  <!-- ============ START SCREEN ============ -->
   <div class="screen active" id="screen-start">
     <div class="screen-card">
       <div class="logo-row"><img src="images/instabuilt-thumbnail.png" alt="InstaBuilt"><span>Insta<em>Built</em></span> <b class="badge-3d">3D</b></div>
-      <h1>🏗️ Ndërto Shtëpinë Tënde 3D</h1>
-      <p class="sub">Vizato <b>planimetrinë në 2D</b>, vendos dyer e dritare, mbushe shtëpinë brenda e jashtë me mobilie, dhe shëtit në <b>3D në kohë reale</b> — me ndriçim nga mëngjesi deri natën.</p>
-      <button class="btn-start" id="btn-start" type="button">🚀 Filloni ndërtimin</button>
-      <button class="btn-continue hidden" id="btn-continue" type="button">💾 Vazhdo lojën e ruajtur</button>
-      <p class="foot-note">Vizato planimetrinë në 2D, pastaj kalo në 3D për të mobiluar e për ta parë shtëpinë. Ruaje projektin kur të duash.</p>
+      <h1>🏗️ Build Your House 3D</h1>
+      <p class="sub">Draw your <b>floor plan in 2D</b>, place doors and windows, furnish the house inside and out, and walk through it in <b>real-time 3D</b> — with lighting from morning to night.</p>
+      <button class="btn-start" id="btn-start" type="button">🚀 Start building</button>
+      <button class="btn-continue hidden" id="btn-continue" type="button">💾 Continue saved game</button>
+      <p class="foot-note">Draw your floor plan in 2D, then switch to 3D to furnish and view the house. Save your project whenever you like.</p>
     </div>
   </div>
 
@@ -34,47 +34,47 @@
         <div class="hud-logo"><img src="images/instabuilt-thumbnail.png" alt=""><span>Insta<em>Built</em></span> <span class="hud-loc" id="hud-loc"></span></div>
         <div class="floor-bar" id="floor-bar"></div>
         <div class="daynight">
-          <span class="daynight-label" id="daynight-label">☀️ Mesditë</span>
+          <span class="daynight-label" id="daynight-label">☀️ Midday</span>
           <input type="range" id="time-slider" min="0" max="100" value="50">
         </div>
       </div>
       <div class="hud-btns">
         <button class="btn-game btn-ghost" id="btn-2d" type="button">📐 2D</button>
-        <button class="btn-game btn-ghost" id="btn-inside" type="button">🚪 Shiko brenda</button>
-        <button class="btn-game btn-ghost" id="btn-save" type="button">💾 Ruaj</button>
+        <button class="btn-game btn-ghost" id="btn-inside" type="button">🚪 View inside</button>
+        <button class="btn-game btn-ghost" id="btn-save" type="button">💾 Save</button>
         <button class="btn-game btn-ghost" id="btn-coop" type="button">👥 Co-op</button>
-        <button class="btn-game btn-ghost" id="btn-restart" type="button">🔄 Fillo nga e para</button>
+        <button class="btn-game btn-ghost" id="btn-restart" type="button">🔄 Start over</button>
       </div>
     </div>
 
     <div class="left-stack">
-    <!-- Paneli i ndërtimit (majtas) -->
+    <!-- Build panel (left) -->
     <div class="side-panel" id="panel-build">
-      <div class="panel-title">🔨 Ndërto</div>
+      <div class="panel-title">🔨 Build</div>
       <div class="tabs" id="tool-tabs">
-        <button class="tab active" data-tab="house" type="button">Shtëpi</button>
-        <button class="tab" data-tab="build" type="button">Ndërtim</button>
-        <button class="tab" data-tab="furniture" type="button">Mobilie</button>
-        <button class="tab" data-tab="struct" type="button">Strukturë</button>
-        <button class="tab" data-tab="outdoor" type="button">Jashtë</button>
+        <button class="tab active" data-tab="house" type="button">House</button>
+        <button class="tab" data-tab="build" type="button">Build</button>
+        <button class="tab" data-tab="furniture" type="button">Furniture</button>
+        <button class="tab" data-tab="struct" type="button">Structure</button>
+        <button class="tab" data-tab="outdoor" type="button">Outdoor</button>
       </div>
       <div class="tool-list" id="tool-list"></div>
-      <div class="panel-hint" id="tool-hint">Kliko në tokë për të vendosur</div>
+      <div class="panel-hint" id="tool-hint">Click on the ground to place</div>
     </div>
 
-    <!-- Paneli i stilit (majtas, nën panelin e ndërtimit) -->
+    <!-- Style panel (left, below the build panel) -->
     <div class="side-panel" id="panel-style">
-      <div class="panel-title">🎨 Stili</div>
+      <div class="panel-title">🎨 Style</div>
 
       <div class="resize-panel hidden" id="resize-panel">
-        <div class="resize-title">📏 Zmadho murin</div>
+        <div class="resize-title">📏 Resize wall</div>
         <div class="resize-row">
-          <label>Anash</label>
+          <label>Width</label>
           <input type="range" id="resize-w" min="1" max="20" step="0.1" value="4">
           <span class="resize-val" id="resize-w-val">4.0 m</span>
         </div>
         <div class="resize-row">
-          <label>Lart</label>
+          <label>Height</label>
           <input type="range" id="resize-h" min="1" max="6" step="0.1" value="2.7">
           <span class="resize-val" id="resize-h-val">2.7 m</span>
         </div>
@@ -84,7 +84,7 @@
         <div class="style-col">
           <canvas id="colorwheel" width="160" height="160"></canvas>
           <div class="value-row">
-            <span>Ndriçim</span>
+            <span>Brightness</span>
             <input type="range" id="value-slider" min="0" max="100" value="100">
           </div>
           <div class="swatch-row">
@@ -93,62 +93,62 @@
           </div>
         </div>
         <div class="style-col">
-          <div class="style-label">Materiali</div>
+          <div class="style-label">Material</div>
           <div class="material-list" id="material-list"></div>
         </div>
       </div>
       <div class="transform-actions">
-        <button class="btn-game btn-ghost small" id="btn-move" type="button">✋ Lëviz</button>
-        <button class="btn-game btn-ghost small" id="btn-paint" type="button">🖌️ Lyej</button>
-        <button class="btn-game btn-ghost small" id="btn-delete" type="button">🗑️ Fshi</button>
-        <button class="btn-game btn-ghost small" id="btn-resize" type="button">📏 Zmadho</button>
+        <button class="btn-game btn-ghost small" id="btn-move" type="button">✋ Move</button>
+        <button class="btn-game btn-ghost small" id="btn-paint" type="button">🖌️ Paint</button>
+        <button class="btn-game btn-ghost small" id="btn-delete" type="button">🗑️ Delete</button>
+        <button class="btn-game btn-ghost small" id="btn-resize" type="button">📏 Resize</button>
         <button class="btn-game btn-ghost small" id="btn-snap" type="button">📏 Snap</button>
       </div>
       <div class="rot-row">
         <button class="btn-game btn-ghost small" id="btn-rot-ccw" type="button">↺</button>
-        <span class="rot-label">Rrotullim</span>
+        <span class="rot-label">Rotation</span>
         <button class="btn-game btn-ghost small" id="btn-rot-cw" type="button">↻</button>
         <button class="btn-game btn-ghost small" id="btn-rot-90" type="button">90°</button>
       </div>
       <div class="undo-row">
-        <button class="btn-game btn-ghost small" id="btn-undo" type="button">↩️ Zhbëj</button>
-        <button class="btn-game btn-ghost small" id="btn-redo" type="button">↪️ Rikthe</button>
+        <button class="btn-game btn-ghost small" id="btn-undo" type="button">↩️ Undo</button>
+        <button class="btn-game btn-ghost small" id="btn-redo" type="button">↪️ Redo</button>
       </div>
     </div>
     </div>
 
     <div class="hud-bottom">
-      <div class="hud-tip">📐 Vizato planimetrinë në <b>2D</b>: kliko e tërhiq për mure · <b>Q/E</b> rrotullim · <b>R</b> 90° · <b>📏 Zmadho</b> = kliko një mur e rrite anash/lart · kalo në <b>3D</b> me 📐2D · Brenda: WASD</div>
+      <div class="hud-tip">📐 Draw your floor plan in <b>2D</b>: click & drag for walls · <b>Q/E</b> rrotullim · <b>R</b> 90° · <b>📏 Resize</b> = click a wall and enlarge it width/height · switch to <b>3D</b> me 📐2D · Inside: WASD</div>
       <div class="toast" id="toast"></div>
     </div>
   </div>
 
-  <div class="inside-hint hidden" id="inside-hint">🚶 Je brenda shtëpisë! Lëviz me <b>WASD</b>, shiko me maus, <b>Shift</b> = vrapo · <b>W/S</b> mbi shkallë = ngjit/zbrit</div>
+  <div class="inside-hint hidden" id="inside-hint">🚶 You are inside the house! Move with <b>WASD</b>, look with the mouse, <b>Shift</b> = run · <b>W/S</b> on stairs = up/down</div>
 
-  <!-- ============ UDHËRRËFYESI (Nino) — 2D, lart-djathtas ============ -->
+  <!-- ============ GUIDE (Nino) — 2D, top-right ============ -->
   <div class="guide-2d hidden" id="guide-2d">
     <div class="guide-2d-bubble" id="guide-bubble"></div>
-    <img src="images/nino.png" alt="Nino — udhërrëfyesi" class="guide-2d-avatar">
+    <img src="images/nino.png" alt="Nino — the guide" class="guide-2d-avatar">
   </div>
 
-  <!-- ============ MODALI CO-OP ============ -->
+  <!-- ============ CO-OP MODAL ============ -->
   <div class="modal hidden" id="coop-modal">
     <div class="modal-card">
       <button class="btn-back" id="btn-coop-close" type="button">✕</button>
-      <h2>👥 Ndërto bashkë (Co-op)</h2>
-      <p class="sub">Deri në 4 lojtarë online, në të njëjtën shtëpi.</p>
-      <button class="btn-game btn-primary" id="btn-host" type="button">🏠 Krijo dhomë</button>
+      <h2>👥 Build together (Co-op)</h2>
+      <p class="sub">Up to 4 players online, in the same house.</p>
+      <button class="btn-game btn-primary" id="btn-host" type="button">🏠 Create room</button>
       <div class="coop-room hidden" id="coop-room">
-        <div class="coop-code-label">Kodi i dhomës — jepjua shokëve:</div>
+        <div class="coop-code-label">Room code — share it with friends:</div>
         <div class="coop-code" id="coop-code-display">—</div>
-        <div class="coop-peers" id="coop-peers">Lojtarë: 1</div>
+        <div class="coop-peers" id="coop-peers">Players: 1</div>
       </div>
-      <div class="coop-divider">ose</div>
+      <div class="coop-divider">or</div>
       <div class="coop-join-row">
-        <input type="text" id="coop-code" placeholder="Kodi i dhomës" maxlength="12">
-        <button class="btn-game btn-ghost" id="btn-join" type="button">🔗 Bashkohu</button>
+        <input type="text" id="coop-code" placeholder="Room code" maxlength="12">
+        <button class="btn-game btn-ghost" id="btn-join" type="button">🔗 Join</button>
       </div>
-      <div class="coop-status" id="coop-status">Nuk je lidhur.</div>
+      <div class="coop-status" id="coop-status">Not connected.</div>
     </div>
   </div>
 </div>

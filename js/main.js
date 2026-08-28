@@ -66,12 +66,12 @@
     if (house.models && house.models.length) {
       const hint = document.createElement('span');
       hint.className = 'modal-models-hint';
-      hint.textContent = '👆 Prek një model për ta parë brenda e jashtë:';
+      hint.textContent = '👆 Tap a model to view it inside & out:';
       modelsWrap.appendChild(hint);
       const allBtn = document.createElement('button');
       allBtn.type = 'button';
       allBtn.className = 'modal-model-btn active';
-      allBtn.textContent = '🏠 Të gjitha pamjet';
+      allBtn.textContent = '🏠 All views';
       allBtn.addEventListener('click', () => {
         setGallery(modelImages);
         modelsWrap.querySelectorAll('.modal-model-btn').forEach((b) => b.classList.remove('active'));
